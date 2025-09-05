@@ -22,7 +22,7 @@ test-coverage: ## Run tests with coverage report
 	poetry run pytest tests/ --cov=actionwire --cov-report=html --cov-report=term
 
 lint: ## Run linting checks
-	poetry run flake8 actionwire/ tests/
+	poetry run ruff check actionwire/ tests/
 	poetry run mypy actionwire/
 
 format: ## Format code using black and isort
