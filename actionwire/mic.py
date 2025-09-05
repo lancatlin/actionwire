@@ -39,12 +39,6 @@ def create_mic(observer: ObserverBase[bytes], scheduler):
 
 mic_stream = rx.create(create_mic)
 
-def main():
-    # Subscribe to the mic stream
-    mic_stream.subscribe(lambda x: print("got data", len(x)))
-    
-
 if __name__ == "__main__":
-    # asyncio.run(main())
-    main()
+    mic_stream.subscribe(lambda x: print("got data", len(x)))
 

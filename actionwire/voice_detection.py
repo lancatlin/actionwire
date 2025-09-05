@@ -8,13 +8,15 @@ import mic
 
 
 def create_vosk():
-    # model = Model(lang="cn")
-    # rec = KaldiRecognizer(model, config.samplerate)
+    model = Model(lang="cn")
+    rec = KaldiRecognizer(model, config.samplerate)
     def _vosk(source: rx.Observable[bytes]):
         def subscribe(observer: rx.Observer[str], scheduler):
             def on_next(frame: bytes):
                 # print("Received:", frame)
-                observer.on_next("hi")
+                if rec.AcceptWaveform(frame):
+                    result = rec.PartialResult()
+                    observer.on_next(result)
 
             return source.subscribe(
                 on_next,
