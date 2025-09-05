@@ -5,6 +5,8 @@ import reactivex as rx
 import sounddevice as sd  # type: ignore
 from reactivex.abc import DisposableBase, ObserverBase, SchedulerBase, disposable
 
+import config
+
 
 def create_observable(observer: ObserverBase[int], scheduler): 
     observer.on_next(1)
@@ -17,10 +19,6 @@ ob: rx.Observable[int] = rx.create(create_observable)
 ob.subscribe(print)
 
 def create_mic(observer: ObserverBase[bytes], scheduler):
-    device_info = sd.query_devices(None, "input")
-    # soundfile expects an int, sounddevice provides a float:
-    samplerate = int(device_info["default_samplerate"])
-
     def callback(indata, frames, time, status):
         """This is called (from a separate thread) for each audio block."""
         if status:
@@ -31,7 +29,7 @@ def create_mic(observer: ObserverBase[bytes], scheduler):
         observer.on_completed()
 
     # Start the stream asynchronously
-    with sd.RawInputStream(samplerate=samplerate, blocksize=8000, 
+    with sd.RawInputStream(samplerate=config.samplerate, blocksize=8000, 
             dtype="int16", channels=1, callback=callback, finished_callback=finish_callback):
         while True:
             time.sleep(1)
