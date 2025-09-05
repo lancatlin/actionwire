@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "actionwire"
+version = "0.1.0"
+description = ""
+authors = ["Justin Lin <wancat@wancat.cc>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<4.0"
+vosk = "^0.3.45"
+reactivex = "^4.0.4"
+sounddevice = "^0.5.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
