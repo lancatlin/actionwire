@@ -10,6 +10,7 @@ python = ">=3.10,<4.0"
 vosk = "^0.3.45"
 reactivex = "^4.0.4"
 sounddevice = "^0.5.2"
+jieba = "^0.42.1"
 
 
 [tool.poetry.group.dev.dependencies]
