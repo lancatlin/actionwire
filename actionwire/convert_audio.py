@@ -43,10 +43,11 @@ if __name__ == '__main__':
 
         framerate = wf.getframerate()
         audio_stream = create_from_audio(wf)
-        with open("./data/detections.txt", "w") as f:
+        with open("./data/detections.csv", "w") as f:
+            f.write("timecode,keyword\n")
             audio_stream.pipe(
                 voice_detection.create_vosk(framerate=framerate),
                 flat_map(voice_detection.flatten_result),
                 filter(lambda result: result['word'] != '[unk]'),
-                map(lambda result: f"{parse_sec(result['start'])}\t{result['word']}\n")
+                map(lambda result: f"{parse_sec(result['start'])},{result['word']}\n")
             ).subscribe(f.write)
