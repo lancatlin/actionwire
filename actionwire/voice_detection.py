@@ -57,33 +57,11 @@ def create_vosk(framerate: int):
     return _vosk
 
 def flatten_result(match: dict) -> rx.Observable[dict]:
-    """Flattens a speech recognition result dictionary into an Observable stream of individual word results.
-    
-    Args:
-        match: Dictionary containing speech recognition results from Vosk
-        
-    Returns:
-        Observable that emits individual word recognition results, or empty Observable if no results
-    """
     if 'result' in match:
         return rx.from_list(match["result"], scheduler=ImmediateScheduler()) 
     else:
         # Skip results without word matches (e.g. partial results)
         return rx.empty()
-
-def flatten_result_immediate(match: dict):
-    """Alternative flatten function that returns the list directly for use with merge_map.
-    
-    Args:
-        match: Dictionary containing speech recognition results from Vosk
-        
-    Returns:
-        List of word results, or empty list if no results
-    """
-    if 'result' in match:
-        return match["result"]
-    else:
-        return []
 
 def high_confidence(result):
     return result['conf'] > CONFIDENCE_THRESHOLD
@@ -93,10 +71,11 @@ vosk_stream = mic.mic_stream.pipe(
     create_vosk(config.samplerate),
 )
 
-if __name__ == '__main__':
-    vosk_stream.pipe(
+def create_match_stream(source: rx.Observable[dict]):
+    return source.pipe(
         flat_map(flatten_result),
         filter(lambda result: result['word'] != '[unk]')
-        # filter(high_confidence),
-        # filter(lambda result: result['word'] in words),
-    ).subscribe(print)
+    )
+
+if __name__ == '__main__':
+    create_match_stream(vosk_stream).subscribe(print)
