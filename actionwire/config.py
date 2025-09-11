@@ -1,4 +1,4 @@
-import sounddevice as sd
+import sounddevice as sd    # type: ignore
 
 device_info = sd.query_devices(None, "input")
 # soundfile expects an int, sounddevice provides a float:
