@@ -56,7 +56,7 @@ def create_vosk(framerate: int):
         return rx.create(subscribe) 
     return _vosk
 
-def flatten_result(match: dict) -> rx.Observable:
+def flatten_result(match: dict) -> rx.Observable[dict]:
     """Flattens a speech recognition result dictionary into an Observable stream of individual word results.
     
     Args:

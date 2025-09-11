@@ -3,7 +3,7 @@ import time
 import wave
 from reactivex import Observable, create
 from reactivex.abc import ObserverBase
-from reactivex.operators import flat_map, filter
+from reactivex.operators import flat_map, filter, map
 
 import voice_detection
 
@@ -32,6 +32,9 @@ def create_from_audio(wf: wave.Wave_read) -> Observable[bytes]:
     
     return create(subscribe)
 
+def parse_sec(sec: float) -> str:
+    return f"{int(sec // 60):02d}:{int(sec % 60):02d}"
+
 if __name__ == '__main__':
     with wave.open(sys.argv[1], 'rb') as wf:
         if wf.getnchannels() != 1 or wf.getsampwidth() != 2 or wf.getcomptype() != "NONE":
@@ -40,8 +43,10 @@ if __name__ == '__main__':
 
         framerate = wf.getframerate()
         audio_stream = create_from_audio(wf)
-        audio_stream.pipe(
-            voice_detection.create_vosk(framerate=framerate),
-            flat_map(voice_detection.flatten_result),
-            filter(lambda result: result['word'] != '[unk]')
-        ).subscribe(print)
+        with open("./data/detections.txt", "w") as f:
+            audio_stream.pipe(
+                voice_detection.create_vosk(framerate=framerate),
+                flat_map(voice_detection.flatten_result),
+                filter(lambda result: result['word'] != '[unk]'),
+                map(lambda result: f"{parse_sec(result['start'])}\t{result['word']}\n")
+            ).subscribe(f.write)
