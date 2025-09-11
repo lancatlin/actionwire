@@ -5,6 +5,7 @@ from reactivex import Observable, create
 from reactivex.abc import ObserverBase
 from reactivex.operators import flat_map, filter, map
 
+from actionwire import utils
 import voice_detection
 
 
@@ -32,9 +33,6 @@ def create_from_audio(wf: wave.Wave_read) -> Observable[bytes]:
     
     return create(subscribe)
 
-def parse_sec(sec: float) -> str:
-    return f"{int(sec // 60):02d}:{int(sec % 60):02d}"
-
 if __name__ == '__main__':
     with wave.open(sys.argv[1], 'rb') as wf:
         if wf.getnchannels() != 1 or wf.getsampwidth() != 2 or wf.getcomptype() != "NONE":
@@ -51,5 +49,5 @@ if __name__ == '__main__':
         # with open("./data/detections.csv", "w") as f:
             # f.write("timecode,keyword\n")
         match_stream.pipe(
-            map(lambda result: f"{parse_sec(result['start'])},{result['word']}\n")
+            map(lambda result: f"{utils.format_timecode(result['start'])},{result['word']}\n")
         ).subscribe(print)

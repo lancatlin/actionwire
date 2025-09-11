@@ -67,10 +67,6 @@ def high_confidence(result):
     return result['conf'] > CONFIDENCE_THRESHOLD
 
 
-vosk_stream = mic.mic_stream.pipe(
-    create_vosk(config.samplerate),
-)
-
 def create_match_stream(source: rx.Observable[dict]):
     return source.pipe(
         flat_map(flatten_result),
@@ -78,4 +74,8 @@ def create_match_stream(source: rx.Observable[dict]):
     )
 
 if __name__ == '__main__':
+    vosk_stream = mic.mic_stream.pipe(
+        create_vosk(config.samplerate),
+    )
+
     create_match_stream(vosk_stream).subscribe(print)
