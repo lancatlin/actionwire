@@ -15,37 +15,13 @@ keywords = [
     '就像你',
 ]
 
-def load_detections(file_path):
-    """Load detections.csv file."""
-    detections = []
-    try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                if row['timecode'] and row['keyword']:  # Skip empty rows
-                    detections.append({
-                        'start': parse_timecode(row['timecode']),
-                        'word': row['keyword'],
-                    })
-    except FileNotFoundError:
-        print(f"Error: File {file_path} not found.")
-        sys.exit(1)
-    except Exception as e:
-        print(f"Error reading {file_path}: {e}")
-        sys.exit(1)
-    
-    return detections
+class Detection:
+    def __init__(self, start: float, word: str):
+        self.start = start
+        self.word = word
 
-def parse_timecode(timecode_str):
-    """Convert timecode string (MM:SS) to seconds for easier comparison."""
-    try:
-        parts = timecode_str.split(':')
-        if len(parts) == 2:
-            minutes, seconds = map(int, parts)
-            return minutes * 60 + seconds
-        return 0
-    except (ValueError, AttributeError):
-        return 0
+    def __str__(self):
+        return f"Detection({utils.format_timecode(self.start)}, {self.word})"
 
 class Match:
     def __init__(self, start: float, word: str):
@@ -56,26 +32,52 @@ class Match:
         return f"Match({utils.format_timecode(self.start)}, {self.word})"
 
 class Matcher:
-    def __init__(self, matches: list[Match], queue: list[Match]):
-        self.matches = matches
+    def __init__(self, queue: list[Detection], new_match: Match | None):
         self.queue = queue
+        self.new_match = new_match
 
-    def match(self, detection: Match) -> 'Matcher':
+    def match(self, detection: Detection) -> 'Matcher':
         concatStr = ''.join([detection.word for detection in self.queue])
-        print(utils.format_timecode(detection.start), concatStr)
+        # print(utils.format_timecode(detection.start), concatStr)
         for keyword in keywords:
             if concatStr.find(keyword) != -1:
-                print(f"Matched: {keyword}")
-                return Matcher(self.matches + [Match(detection.start, keyword)], [])
-        return Matcher(self.matches, self.queue + [detection])
+                # print(f"Matched: {keyword}")
+                return Matcher([], Match(detection.start, keyword))
+        return Matcher(self.queue + [detection], None)
+
+    def getMatch(self) -> Match | None:
+        return self.new_match
 
     def __str__(self):
         return f"Matcher(matches={self.matches}, queue={self.queue})"
 
+
+def load_detections(file_path) -> list[Detection]:
+    """Load detections.csv file."""
+    detections: list[Detection] = []
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if row['timecode'] and row['keyword']:  # Skip empty rows
+                    detections.append(Detection(
+                        utils.parse_timecode(row['timecode']),
+                        row['keyword']
+                    ))
+    except FileNotFoundError:
+        print(f"Error: File {file_path} not found.")
+        sys.exit(1)
+    except Exception as e:
+        print(f"Error reading {file_path}: {e}")
+        sys.exit(1)
+    
+    return detections
+
 if __name__ == '__main__':
     detections = rx.from_list(load_detections("./data/detections.csv"))
     detections.pipe(
-        ops.map(lambda detection: Match(detection['start'], detection['word'])),
-        ops.reduce(lambda matcher, detection: matcher.match(detection), Matcher([], [])),
-        ops.flat_map(lambda matcher: matcher.matches)
+        # ops.map(lambda detection: Detection(detection['start'], detection['word'])),
+        ops.scan(lambda matcher, detection: matcher.match(detection), Matcher([], None)),
+        ops.map(Matcher.getMatch),
+        ops.filter(lambda match: match != None)
     ).subscribe(print)
