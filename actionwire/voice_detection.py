@@ -3,6 +3,7 @@ from reactivex import operators
 from reactivex.abc import ObservableBase
 from reactivex.observable import Observable
 from reactivex.operators import filter, flat_map
+from reactivex.scheduler import ImmediateScheduler
 from vosk import KaldiRecognizer, Model  # type: ignore
 import reactivex as rx
 import vosk  # type: ignore
@@ -65,10 +66,24 @@ def flatten_result(match: dict) -> rx.Observable:
         Observable that emits individual word recognition results, or empty Observable if no results
     """
     if 'result' in match:
-        return rx.from_list(match["result"]) 
+        return rx.from_list(match["result"], scheduler=ImmediateScheduler()) 
     else:
         # Skip results without word matches (e.g. partial results)
         return rx.empty()
+
+def flatten_result_immediate(match: dict):
+    """Alternative flatten function that returns the list directly for use with merge_map.
+    
+    Args:
+        match: Dictionary containing speech recognition results from Vosk
+        
+    Returns:
+        List of word results, or empty list if no results
+    """
+    if 'result' in match:
+        return match["result"]
+    else:
+        return []
 
 def high_confidence(result):
     return result['conf'] > CONFIDENCE_THRESHOLD

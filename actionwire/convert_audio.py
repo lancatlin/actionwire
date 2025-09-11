@@ -21,11 +21,12 @@ def create_from_audio(wf: wave.Wave_read) -> Observable[bytes]:
     def subscribe(observer: ObserverBase[bytes], scheduler=None):
         try:
             while True:
-                chunk = wf.readframes(4000)
+                chunk = wf.readframes(8000)
                 if len(chunk) == 0:
+                    observer.on_completed()
                     break
                 observer.on_next(chunk)
-            observer.on_completed()
+                # Small delay to simulate real-time processing
         except Exception as e:
             observer.on_error(e)
     
