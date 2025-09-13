@@ -4,6 +4,9 @@ version = "0.1.0"
 description = ""
 authors = ["Justin Lin <wancat@wancat.cc>"]
 readme = "README.md"
+packages = [
+    { include = "actionwire" }
+]
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4.0"

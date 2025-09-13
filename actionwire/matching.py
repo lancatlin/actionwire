@@ -3,7 +3,8 @@ import sys
 import reactivex as rx
 import reactivex.operators as ops
 
-import utils
+from actionwire.data_types import Detection, Match
+from actionwire import utils
 
 keywords = [
     '喝茶',
@@ -13,25 +14,6 @@ keywords = [
     '转换',
     '就像你',
 ]
-
-class Detection:
-    def __init__(self, start: float, word: str):
-        self.start = start
-        self.word = word
-
-    def __str__(self):
-        return f"Detection({utils.format_timecode(self.start)}, {self.word})"
-
-class Match:
-    def __init__(self, start: float, word: str):
-        self.start = start
-        self.word = word
-
-    def __str__(self):
-        return f"Match({utils.format_timecode(self.start)}, {self.word})"
-    
-    def format_csv(self):
-        return f"{utils.format_timecode(self.start)},{self.word}"
 
 class Matcher:
     def __init__(self, queue: str, new_match: Match | None):
