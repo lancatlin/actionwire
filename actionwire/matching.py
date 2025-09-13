@@ -3,8 +3,10 @@ import sys
 import reactivex as rx
 import reactivex.operators as ops
 
+from actionwire.action import Action
 from actionwire.data_types import Detection, Match
 from actionwire import utils
+from actionwire.rule import KeyRule
 
 keywords = [
     '喝茶',
@@ -16,25 +18,25 @@ keywords = [
 ]
 
 class Matcher:
-    def __init__(self, queue: str, new_match: Match | None):
+    def __init__(self, rule: KeyRule, queue: str, action: Action | None):
         self.queue = queue
-        self.new_match = new_match
+        self.action = action
+        self.rule = rule
 
     def match(self, detection: Detection) -> 'Matcher':
-        concatStr = self.queue + detection.word
+        queue = self.queue + detection.word
         # print(utils.format_timecode(detection.start), concatStr)
-        for keyword in keywords:
-            if concatStr.find(keyword) != -1:
-                # print(f"Matched: {keyword}")
-                return Matcher('', Match(detection.start, keyword))
-        return Matcher(concatStr, None)
+        action = self.rule.satisfies(queue)
+        if action:
+            return Matcher(self.rule, '', action)
+        return Matcher(self.rule, queue, None)
 
-    def hasMatch(self) -> bool:
-        return self.new_match is not None
+    def hasAction(self) -> bool:
+        return self.action is not None
 
-    def getMatch(self) -> Match:
-        if self.new_match is not None:
-            return self.new_match
+    def getAction(self) -> Action:
+        if self.action is not None:
+            return self.action
         raise Exception("No new match")
 
     def __str__(self):
@@ -42,12 +44,11 @@ class Matcher:
 
 
 class KeywordScanner:
-    def scan(self, source: rx.Observable[Detection]) -> rx.Observable[Match]:
+    def scan(self, source: rx.Observable[Detection]) -> rx.Observable[Action]:
         return source.pipe(
-            ops.scan(Matcher.match, Matcher('', None)),
-            ops.filter(Matcher.hasMatch),
-            ops.map(Matcher.getMatch),
-            ops.map(Match.format_csv),
+            ops.scan(Matcher.match, Matcher(KeyRule(keywords), '', None)),
+            ops.filter(Matcher.hasAction),
+            ops.map(Matcher.getAction),
         )
 
 
@@ -76,4 +77,4 @@ def load_detections(file_path) -> list[Detection]:
 if __name__ == '__main__':
     detections = rx.from_list(load_detections("./data/detections.csv"))
     scanner = KeywordScanner()
-    scanner.scan(detections).subscribe(print)
+    scanner.scan(detections).subscribe(lambda action: action.do())
