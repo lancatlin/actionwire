@@ -1,5 +1,4 @@
 import csv
-import re
 import sys
 import reactivex as rx
 import reactivex.operators as ops
@@ -30,26 +29,45 @@ class Match:
 
     def __str__(self):
         return f"Match({utils.format_timecode(self.start)}, {self.word})"
+    
+    def format_csv(self):
+        return f"{utils.format_timecode(self.start)},{self.word}"
 
 class Matcher:
-    def __init__(self, queue: list[Detection], new_match: Match | None):
+    def __init__(self, queue: str, new_match: Match | None):
         self.queue = queue
         self.new_match = new_match
 
     def match(self, detection: Detection) -> 'Matcher':
-        concatStr = ''.join([detection.word for detection in self.queue])
+        concatStr = self.queue + detection.word
         # print(utils.format_timecode(detection.start), concatStr)
         for keyword in keywords:
             if concatStr.find(keyword) != -1:
                 # print(f"Matched: {keyword}")
-                return Matcher([], Match(detection.start, keyword))
-        return Matcher(self.queue + [detection], None)
+                return Matcher('', Match(detection.start, keyword))
+        return Matcher(concatStr, None)
 
-    def getMatch(self) -> Match | None:
-        return self.new_match
+    def hasMatch(self) -> bool:
+        return self.new_match is not None
+
+    def getMatch(self) -> Match:
+        if self.new_match is not None:
+            return self.new_match
+        raise Exception("No new match")
 
     def __str__(self):
         return f"Matcher(matches={self.matches}, queue={self.queue})"
+
+
+class KeywordScanner:
+    def scan(self, source: rx.Observable[Detection]) -> rx.Observable[Match]:
+        return source.pipe(
+            ops.scan(Matcher.match, Matcher('', None)),
+            ops.filter(Matcher.hasMatch),
+            ops.map(Matcher.getMatch),
+            ops.map(Match.format_csv),
+        )
+
 
 
 def load_detections(file_path) -> list[Detection]:
@@ -75,9 +93,5 @@ def load_detections(file_path) -> list[Detection]:
 
 if __name__ == '__main__':
     detections = rx.from_list(load_detections("./data/detections.csv"))
-    detections.pipe(
-        # ops.map(lambda detection: Detection(detection['start'], detection['word'])),
-        ops.scan(lambda matcher, detection: matcher.match(detection), Matcher([], None)),
-        ops.map(Matcher.getMatch),
-        ops.filter(lambda match: match != None)
-    ).subscribe(print)
+    scanner = KeywordScanner()
+    scanner.scan(detections).subscribe(print)
