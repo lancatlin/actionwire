@@ -12,6 +12,7 @@ thread_pool_scheduler = ThreadPoolScheduler(thread_count)
 keywords = [
     '喝茶',
     '喝这杯水',
+    '喝杯水',
     '自己',
     '醒来',
     '转换',

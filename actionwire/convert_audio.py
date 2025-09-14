@@ -1,12 +1,16 @@
 import sys
+import threading
 import time
 import wave
 from reactivex import Observable, create
 from reactivex.abc import ObserverBase
 from reactivex.operators import flat_map, filter, map
 
-from actionwire import utils
+from actionwire import config, utils
+from actionwire.data_types import Match
+from actionwire.matching import KeywordScanner
 import voice_detection
+from shlex import join
 
 
 def create_from_audio(wf: wave.Wave_read) -> Observable[bytes]:
@@ -44,10 +48,13 @@ if __name__ == '__main__':
         vosk_stream = audio_stream.pipe(
             voice_detection.create_vosk(framerate=framerate),
         )
-        match_stream = voice_detection.create_detection_stream(vosk_stream)
+        detection_stream = voice_detection.create_detection_stream(vosk_stream)
+        # detection_stream.subscribe(print)
 
-        # with open("./data/detections.csv", "w") as f:
-            # f.write("timecode,keyword\n")
-        match_stream.pipe(
-            map(lambda result: f"{utils.format_timecode(result['start'])},{result['word']}\n")
-        ).subscribe(print)
+        with open("./data/detections.csv", "w") as f:
+            f.write("timecode,keyword\n")
+            scanner = KeywordScanner(config.keywords)
+            scanner.scan(detection_stream).pipe(
+                    map(Match.format_csv)
+                ).subscribe(f.write)
+            # input("Press enter to stop")

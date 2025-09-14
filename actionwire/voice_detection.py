@@ -12,11 +12,11 @@ from actionwire.data_types import Detection
 import config
 import mic
 
-CONFIDENCE_THRESHOLD = 0.9
+CONFIDENCE_THRESHOLD = 0.7
 
 words = [
     "喝",
-    "這",
+    "这",
     "杯",
     "水",
     "就像",
@@ -72,7 +72,8 @@ def create_detection_stream(source: rx.Observable[dict]) -> rx.Observable[Detect
     return source.pipe(
         flat_map(flatten_result),
         filter(lambda result: result['word'] != '[unk]'),
-        map(lambda result: Detection(start=result['start'], word=result['word']))
+        filter(high_confidence),
+        map(lambda result: Detection(start=result['start'], word=result['word'], confidence=result['conf']))
     )
 
 if __name__ == '__main__':

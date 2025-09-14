@@ -24,7 +24,7 @@ def create_mic(observer: ObserverBase[bytes], scheduler):
             dtype="int16", channels=1, callback=callback, finished_callback=finish_callback):
         while True:
             time.sleep(1)
-            print("waiting...")
+            # print("waiting...")
 
 
 

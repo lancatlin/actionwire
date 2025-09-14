@@ -19,7 +19,7 @@ class Matcher:
         # print(utils.format_timecode(detection.start), concatStr)
         for keyword in self.keywords:
             if queue.find(keyword) != -1:
-                return Matcher(self.keywords, '', Match(start=detection.start, word=keyword))
+                return Matcher(self.keywords, '', Match(start=detection.start, word=keyword, confidence=detection.confidence))
         return Matcher(self.keywords, queue, None)
 
     def hasMatch(self) -> bool:
@@ -59,7 +59,8 @@ def load_detections(file_path) -> list[Detection]:
                 if row['timecode'] and row['keyword']:  # Skip empty rows
                     detections.append(Detection(
                         utils.parse_timecode(row['timecode']),
-                        row['keyword']
+                        row['keyword'],
+                        float(row['confidence']),
                     ))
     except FileNotFoundError:
         print(f"Error: File {file_path} not found.")

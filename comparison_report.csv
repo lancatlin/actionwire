@@ -1,16 +1,11 @@
 Detection Timecode,Detection Keyword,Script Timecode,Script Keyword,Time Difference (s),Script Event,Script Action
 00:25,喝茶,00:25,喝茶,0,off/on,"(1) seek playhead
 (2) light"
-00:27,你,00:25,喝茶,2,off/on,"(1) seek playhead
-(2) light"
 01:38,自己,01:48,自己,10,one,light
-01:47,杯,01:48,自己,1,one,light
 01:48,自己,01:48,自己,0,one,light
 01:56,自己,01:56,自己,0,one,light
 02:04,自己,02:04,自己,0,one,light
-02:34,就像,02:32,自己,2,one,light
 02:36,自己,02:36,自己,0,one,light
-02:58,你,02:55,醒來(A),3,A/B loop,light
 03:15,自己,03:15,自己,0,one,light
 03:21,自己,03:21,自己,0,one,light
 03:23,自己,03:23,自己,0,one,light
@@ -18,109 +13,50 @@ Detection Timecode,Detection Keyword,Script Timecode,Script Keyword,Time Differe
 03:40,转换,03:43,自己,3,one,light
 03:41,自己,03:43,自己,2,one,light
 03:43,自己,03:43,自己,0,one,light
-03:53,水,03:57,自己,4,one,light
 03:57,自己,03:57,自己,0,one,light
 03:58,自己,03:58,自己,0,one,light
-04:06,就像,04:05,就像你,1,one,"light
-*if not white→white
-*if white→yellow"
-04:06,你,04:05,就像你,1,one,"light
-*if not white→white
-*if white→yellow"
 04:31,自己,04:31,自己,0,one,light
-04:41,醒来,04:40,醒來(B),1,A/B loop,light
-05:42,转换,05:41,轉換(A),1,A/B loop,light
-06:00,转换,06:00,轉換(B),0,A/B loop,light
-06:04,就像,06:00,轉換(B),4,A/B loop,light
+04:41,醒来,04:40,醒來,1,A/B loop,light
+05:42,转换,05:41,轉換,1,A/B loop,light
+06:00,转换,06:00,轉換,0,A/B loop,light
 06:13,自己,06:12,自己,1,one,light
-06:17,转换,06:17,轉換(A),0,A/B loop,light
+06:17,转换,06:17,轉換,0,A/B loop,light
 06:22,转换,06:22,轉換,0,A/B loop,ø
 06:49,喝茶,06:51,自己,2,one,light
-08:06,水,08:15,轉換(B),9,A/B loop,light
-08:08,自己,08:15,轉換(B),7,A/B loop,light
-08:15,喝,08:15,轉換(B),0,A/B loop,light
-08:15,转换,08:15,轉換(B),0,A/B loop,light
+08:08,自己,08:15,轉換,7,A/B loop,light
+08:15,转换,08:15,轉換,0,A/B loop,light
 08:18,转换,08:17,轉換,1,A/B loop,ø
-08:18,杯,08:17,轉換,1,A/B loop,ø
 08:19,转换,08:19,轉換,0,A/B loop,ø
-08:27,你,08:19,轉換,8,A/B loop,ø
-08:40,就像,08:42,自己,2,one,light
 08:42,自己,08:42,自己,0,one,light
-08:45,就像,08:42,自己,3,one,light
-08:47,自己,08:42,自己,5,one,light
-08:54,醒来,08:54,醒來(A),0,A/B loop,light
-08:55,水,08:54,醒來(A),1,A/B loop,light
-08:55,喝,08:54,醒來(A),1,A/B loop,light
-08:58,转换,08:54,醒來(A),4,A/B loop,light
-09:08,水,09:12,自己,4,one,light
-09:10,转换,09:12,自己,2,one,light
+08:54,醒来,08:54,醒來,0,A/B loop,light
+08:58,转换,08:54,醒來,4,A/B loop,light
 09:13,自己,09:12,自己,1,one,light
-09:19,醒来,09:19,醒來(B),0,A/B loop,light
+09:19,醒来,09:19,醒來,0,A/B loop,light
 09:22,转换,09:24,自己,2,one,light
 09:25,自己,09:24,自己,1,one,light
-09:25,水,09:24,自己,1,one,light
-09:30,就像,09:32,自己,2,one,light
 09:33,自己,09:32,自己,1,one,light
 09:34,醒来,09:32,自己,2,one,light
-09:35,你,09:32,自己,3,one,light
 11:23,醒来,11:30,自己,7,one,light
 11:30,自己,11:30,自己,0,one,light
-11:37,喝,11:30,自己,7,one,light
-11:47,自己,11:49,自己,2,one,light
 11:50,自己,11:49,自己,1,one,light
-11:53,就像,11:49,自己,4,one,light
 12:42,醒来,12:47,喝這杯水,5,,"(1) seek playhead
 (2) light"
 12:46,醒来,12:47,喝這杯水,1,,"(1) seek playhead
 (2) light"
 12:47,喝茶,12:47,喝這杯水,0,,"(1) seek playhead
 (2) light"
-12:48,喝,12:47,喝這杯水,1,,"(1) seek playhead
+12:48,喝杯水,12:47,喝這杯水,1,,"(1) seek playhead
 (2) light"
-12:48,杯,12:47,喝這杯水,1,,"(1) seek playhead
-(2) light"
-12:48,水,12:47,喝這杯水,1,,"(1) seek playhead
-(2) light"
-13:42,就像,13:42,就像你,0,one,"light
+16:47,就像你,16:46,就像你,1,one,"light
 *if not white→white
 *if white→yellow"
-13:43,你,13:42,就像你,1,one,"light
-*if not white→white
-*if white→yellow"
-16:47,就像,16:46,就像你,1,one,"light
-*if not white→white
-*if white→yellow"
-16:48,你,16:46,就像你,2,one,"light
-*if not white→white
-*if white→yellow"
-16:48,水,16:46,就像你,2,one,"light
-*if not white→white
-*if white→yellow"
-17:19,你,17:25,自己,6,one,light
-17:22,水,17:25,自己,3,one,light
 17:26,自己,17:25,自己,1,one,light
-17:30,你,17:25,自己,5,one,light
-18:34,就像,18:33,就像你,1,one,"light
-*if not white→white
-*if white→yellow"
-18:35,你,18:33,就像你,2,one,"light
-*if not white→white
-*if white→yellow"
-18:35,水,18:33,就像你,2,one,"light
-*if not white→white
-*if white→yellow"
-18:36,杯,18:33,就像你,3,one,"light
+18:35,就像你,18:33,就像你,2,one,"light
 *if not white→white
 *if white→yellow"
 18:41,醒来,18:33,就像你,8,one,"light
 *if not white→white
 *if white→yellow"
-18:42,喝,18:33,就像你,9,one,"light
-*if not white→white
-*if white→yellow"
-19:32,就像,19:31,就像你,1,one,"light
-*if not white→white
-*if white→yellow"
-19:33,你,19:31,就像你,2,one,"light
+19:33,就像你,19:31,就像你,2,one,"light
 *if not white→white
 *if white→yellow"
