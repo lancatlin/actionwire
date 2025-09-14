@@ -14,15 +14,6 @@ from shlex import join
 
 
 def create_from_audio(wf: wave.Wave_read) -> Observable[bytes]:
-    """Create an Observable stream from an audio file.
-
-    Args:
-        file: Path to the audio file
-        chunk_size: Size of each chunk to read (default: 1024 bytes)
-
-    Returns:
-        Observable that emits audio data as bytes
-    """
     def subscribe(observer: ObserverBase[bytes], scheduler=None):
         try:
             while True:
