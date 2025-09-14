@@ -5,12 +5,12 @@ import reactivex.operators as ops
 
 from actionwire.action import Action
 from actionwire.data_types import Detection, Match
-from actionwire import utils
+from actionwire import config, utils
 from actionwire.rule import KeyRule
 
 keywords = [
     '喝茶',
-    '喝这杯水', 
+    '喝这杯水',
     '自己',
     '醒来',
     '转换',
@@ -18,37 +18,42 @@ keywords = [
 ]
 
 class Matcher:
-    def __init__(self, rule: KeyRule, queue: str, action: Action | None):
+    def __init__(self, keywords: list[str], queue: str, match: Match | None):
         self.queue = queue
-        self.action = action
-        self.rule = rule
+        self.new_match = match
+        self.keywords = keywords
 
     def match(self, detection: Detection) -> 'Matcher':
         queue = self.queue + detection.word
         # print(utils.format_timecode(detection.start), concatStr)
-        action = self.rule.satisfies(queue)
-        if action:
-            return Matcher(self.rule, '', action)
-        return Matcher(self.rule, queue, None)
+        for keyword in self.keywords:
+            if queue.find(keyword) != -1:
+                return Matcher(self.keywords, '', Match(start=detection.start, word=keyword))
+        return Matcher(self.keywords, queue, None)
 
-    def hasAction(self) -> bool:
-        return self.action is not None
+    def hasMatch(self) -> bool:
+        return self.new_match is not None
 
-    def getAction(self) -> Action:
-        if self.action is not None:
-            return self.action
+    def getMatch(self) -> Match:
+        if self.new_match is not None:
+            return self.new_match
         raise Exception("No new match")
 
     def __str__(self):
-        return f"Matcher(matches={self.matches}, queue={self.queue})"
+        return f"Matcher(matches={self.new_match}, queue={self.queue})"
 
 
 class KeywordScanner:
-    def scan(self, source: rx.Observable[Detection]) -> rx.Observable[Action]:
+    def __init__(self, keywords: list[str]):
+        self.keywords = keywords
+
+    def scan(self, source: rx.Observable[Detection]) -> rx.Observable[Match]:
         return source.pipe(
-            ops.scan(Matcher.match, Matcher(KeyRule(keywords), '', None)),
-            ops.filter(Matcher.hasAction),
-            ops.map(Matcher.getAction),
+            ops.scan(Matcher.match, Matcher(self.keywords, '', None)),
+            ops.filter(Matcher.hasMatch),
+            ops.map(Matcher.getMatch),
+            ops.share(),
+            ops.subscribe_on(config.thread_pool_scheduler)
         )
 
 
@@ -71,10 +76,10 @@ def load_detections(file_path) -> list[Detection]:
     except Exception as e:
         print(f"Error reading {file_path}: {e}")
         sys.exit(1)
-    
+
     return detections
 
 if __name__ == '__main__':
     detections = rx.from_list(load_detections("./data/detections.csv"))
-    scanner = KeywordScanner()
+    scanner = KeywordScanner(KeyRule(keywords))
     scanner.scan(detections).subscribe(lambda action: action.do())

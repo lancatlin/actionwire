@@ -2,12 +2,13 @@ import json
 from reactivex import operators
 from reactivex.abc import ObservableBase
 from reactivex.observable import Observable
-from reactivex.operators import filter, flat_map
+from reactivex.operators import filter, flat_map, map
 from reactivex.scheduler import ImmediateScheduler
 from vosk import KaldiRecognizer, Model  # type: ignore
 import reactivex as rx
 import vosk  # type: ignore
 
+from actionwire.data_types import Detection
 import config
 import mic
 
@@ -53,12 +54,12 @@ def create_vosk(framerate: int):
                 on_error=observer.on_error,
                 scheduler=scheduler
             )
-        return rx.create(subscribe) 
+        return rx.create(subscribe)
     return _vosk
 
 def flatten_result(match: dict) -> rx.Observable[dict]:
     if 'result' in match:
-        return rx.from_list(match["result"], scheduler=ImmediateScheduler()) 
+        return rx.from_list(match["result"], scheduler=ImmediateScheduler())
     else:
         # Skip results without word matches (e.g. partial results)
         return rx.empty()
@@ -67,10 +68,11 @@ def high_confidence(result):
     return result['conf'] > CONFIDENCE_THRESHOLD
 
 
-def create_match_stream(source: rx.Observable[dict]):
+def create_detection_stream(source: rx.Observable[dict]) -> rx.Observable[Detection]:
     return source.pipe(
         flat_map(flatten_result),
-        filter(lambda result: result['word'] != '[unk]')
+        filter(lambda result: result['word'] != '[unk]'),
+        map(lambda result: Detection(start=result['start'], word=result['word']))
     )
 
 if __name__ == '__main__':
@@ -78,4 +80,4 @@ if __name__ == '__main__':
         create_vosk(config.samplerate),
     )
 
-    create_match_stream(vosk_stream).subscribe(print)
+    create_detection_stream(vosk_stream).subscribe(print)

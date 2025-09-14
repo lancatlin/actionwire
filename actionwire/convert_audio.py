@@ -11,11 +11,11 @@ import voice_detection
 
 def create_from_audio(wf: wave.Wave_read) -> Observable[bytes]:
     """Create an Observable stream from an audio file.
-    
+
     Args:
         file: Path to the audio file
         chunk_size: Size of each chunk to read (default: 1024 bytes)
-    
+
     Returns:
         Observable that emits audio data as bytes
     """
@@ -30,7 +30,7 @@ def create_from_audio(wf: wave.Wave_read) -> Observable[bytes]:
                 # Small delay to simulate real-time processing
         except Exception as e:
             observer.on_error(e)
-    
+
     return create(subscribe)
 
 if __name__ == '__main__':
@@ -44,7 +44,7 @@ if __name__ == '__main__':
         vosk_stream = audio_stream.pipe(
             voice_detection.create_vosk(framerate=framerate),
         )
-        match_stream = voice_detection.create_match_stream(vosk_stream)
+        match_stream = voice_detection.create_detection_stream(vosk_stream)
 
         # with open("./data/detections.csv", "w") as f:
             # f.write("timecode,keyword\n")
