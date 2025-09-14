@@ -8,15 +8,6 @@ from actionwire.data_types import Detection, Match
 from actionwire import config, utils
 from actionwire.rule import KeyRule
 
-keywords = [
-    '喝茶',
-    '喝这杯水',
-    '自己',
-    '醒来',
-    '转换',
-    '就像你',
-]
-
 class Matcher:
     def __init__(self, keywords: list[str], queue: str, match: Match | None):
         self.queue = queue
@@ -81,5 +72,5 @@ def load_detections(file_path) -> list[Detection]:
 
 if __name__ == '__main__':
     detections = rx.from_list(load_detections("./data/detections.csv"))
-    scanner = KeywordScanner(KeyRule(keywords))
-    scanner.scan(detections).subscribe(lambda action: action.do())
+    scanner = KeywordScanner(config.keywords)
+    scanner.scan(detections).subscribe(print)

@@ -8,3 +8,12 @@ samplerate = int(device_info["default_samplerate"])
 
 thread_count = multiprocessing.cpu_count()
 thread_pool_scheduler = ThreadPoolScheduler(thread_count)
+
+keywords = [
+    '喝茶',
+    '喝这杯水',
+    '自己',
+    '醒来',
+    '转换',
+    '就像你',
+]

@@ -17,6 +17,9 @@ class Match:
 
     def __str__(self):
         return f"Match({utils.format_timecode(self.start)}, {self.word})"
-    
+
     def format_csv(self):
         return f"{utils.format_timecode(self.start)},{self.word}"
+
+    def timecode(self):
+        return utils.format_timecode(self.start)
