@@ -23,4 +23,4 @@ lights = [
     ("D0:73:D5:89:63:7B", "10.0.0.244")
 ]
 
-brightness_step = 10000
+brightness_step = 20
