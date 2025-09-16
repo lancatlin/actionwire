@@ -6,7 +6,7 @@ from reactivex.observable.observable import Observable
 import reactivex.operators as ops
 from actionwire import config, convert_audio, matching, mic, voice_detection
 from actionwire.action import BrightnessAction, PrintAction, Action
-from actionwire.light import LightController, MockLightController
+from actionwire.light import LifxLightController, AbsLightController
 from actionwire.rule import KeyRule
 from actionwire.data_types import Match
 
@@ -15,8 +15,8 @@ def subscribe(action: Action):
     action.do()
 
 def create_events(source: Observable[Match]) -> Observable[Action]:
-    p_light = LightController(config.lights[0], name="Philosopher")
-    w_light = MockLightController(name="Who is the speaker")
+    p_light = LifxLightController(config.lights[0], name="Philosopher")
+    w_light = AbsLightController(name="Who is the speaker")
 
     # 自己
     self_stream = source.pipe(

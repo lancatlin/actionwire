@@ -1,4 +1,4 @@
-from actionwire.light import LightController
+from actionwire.light import LifxLightController
 
 
 class Action:
@@ -16,7 +16,7 @@ class PrintAction(Action):
         print("Print action:", self.text)
 
 class BrightnessAction(Action):
-    def __init__(self, controller: LightController, diff: int):
+    def __init__(self, controller: LifxLightController, diff: int):
         self.controller = controller
         self.diff = diff
 
