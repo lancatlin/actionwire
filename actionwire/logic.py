@@ -6,7 +6,7 @@ from reactivex.observable.observable import Observable
 import reactivex.operators as ops
 from actionwire import config, convert_audio, matching, mic, voice_detection
 from actionwire.action import BrightnessAction, PrintAction, Action
-from actionwire.light import LightController
+from actionwire.light import LightController, MockLightController
 from actionwire.rule import KeyRule
 from actionwire.data_types import Match
 
@@ -15,32 +15,32 @@ def subscribe(action: Action):
     action.do()
 
 def create_events(source: Observable[Match]) -> Observable[Action]:
-    p_light = LightController(name="Philosopher")
-    w_light = LightController(name="Who is the speaker")
+    p_light = LightController(config.lights[0], name="Philosopher")
+    w_light = MockLightController(name="Who is the speaker")
 
     # 自己
     self_stream = source.pipe(
         ops.filter(lambda match: match.word == '自己'),
-        ops.map(lambda match: BrightnessAction(p_light, 5))
+        ops.map(lambda match: BrightnessAction(p_light, config.brightness_step))
     )
 
     # 醒來
     wake_stream = source.pipe(
         ops.filter(lambda match: match.word == '醒来'),
-        ops.map(lambda _: BrightnessAction(p_light, 20))
+        ops.map(lambda _: BrightnessAction(p_light, config.brightness_step))
     )
 
     # 轉換
     change_stream = source.pipe(
         ops.filter(lambda match: match.word == '转换'),
-        ops.scan(lambda last, _: -last, 10),
+        ops.scan(lambda last, _: -last, config.brightness_step),
         ops.flat_map(lambda value: rx.of(BrightnessAction(p_light, -value), BrightnessAction(w_light, value)))
     )
 
     # 就像你
     like_you_stream = source.pipe(
         ops.filter(lambda match: match.word == '就像你'),
-        ops.flat_map(lambda _: rx.of(BrightnessAction(p_light, 20), BrightnessAction(w_light, -20)))
+        ops.flat_map(lambda _: rx.of(BrightnessAction(p_light, config.brightness_step), BrightnessAction(w_light, -config.brightness_step)))
     )
 
     # 喝茶
