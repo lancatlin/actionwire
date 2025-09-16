@@ -9,11 +9,13 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.10,<4.0"
+python = ">=3.11,<4.0"
 vosk = "^0.3.45"
 reactivex = "^4.0.4"
 sounddevice = "^0.5.2"
 jieba = "^0.42.1"
+numpy = "^2.3.3"
+lifxlan = {git = "https://github.com/mclarkk/lifxlan", rev = "master"}
 
 
 [tool.poetry.group.dev.dependencies]
