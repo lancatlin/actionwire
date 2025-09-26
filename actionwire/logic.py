@@ -12,12 +12,13 @@ from actionwire.action import (
     PrintAction,
     Action,
     ColorAction,
+    SeekAction,
     SwapColorAction,
 )
 from actionwire.light import LifxLightController, AbsLightController
 from actionwire.rule import KeyRule
 from actionwire.data_types import Match
-from actionwire.synchan import SynchanState, create_synchan
+from actionwire.synchan import SynchanController, SynchanState, create_synchan
 
 
 def subscribe(action: Action):
@@ -40,6 +41,7 @@ def create_events(
         name="Who is the speaker",
         brightness=config.initial_brightness,
     )
+    synchan = SynchanController()
 
     # 自己
     self_stream = keywords.pipe(
@@ -86,7 +88,7 @@ def create_events(
     # 喝茶
     tea_stream = keywords.pipe(
         ops.filter(lambda match: match.word == "喝茶"),
-        ops.map(lambda match: PrintAction(f"喝茶: {match.timecode()}")),
+        ops.map(lambda match: SeekAction(synchan, 24)),
     )
 
     # 喝這杯水

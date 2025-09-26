@@ -1,6 +1,7 @@
 from time import sleep
 from typing import final, override
 from actionwire.light import LifxLightController
+from actionwire.synchan import SynchanController
 
 
 class Action:
@@ -75,3 +76,14 @@ class SwapColorAction(Action):
                 self.controller.set_color(color)
                 self.controller.sync(500)
                 break
+
+
+class SeekAction(Action):
+    def __init__(self, controller: SynchanController, target: int) -> None:
+        super().__init__()
+        self.controller = controller
+        self.target = target
+
+    def do(self):
+        self.controller.seek(self.target)
+        self.controller.play()
