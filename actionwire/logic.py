@@ -5,7 +5,7 @@ import reactivex as rx
 from reactivex.observable.observable import Observable
 import reactivex.operators as ops
 from actionwire import config, convert_audio, matching, mic, voice_detection
-from actionwire.action import BrightnessAction, PrintAction, Action
+from actionwire.action import BrightnessAction, FlashAction, PrintAction, Action
 from actionwire.light import LifxLightController, AbsLightController
 from actionwire.rule import KeyRule
 from actionwire.data_types import Match
@@ -25,7 +25,7 @@ def create_events(source: Observable[Match]) -> Observable[Action]:
     # 自己
     self_stream = source.pipe(
         ops.filter(lambda match: match.word == "自己"),
-        ops.map(lambda match: BrightnessAction(p_light, config.brightness_step)),
+        ops.map(lambda match: FlashAction(p_light, 0.5)),
     )
 
     # 醒來
