@@ -1,11 +1,18 @@
 import sys
 import argparse
 import wave
+from lifxlan.light import YELLOW
 import reactivex as rx
 from reactivex.observable.observable import Observable
 import reactivex.operators as ops
 from actionwire import config, convert_audio, matching, mic, voice_detection
-from actionwire.action import BrightnessAction, FlashAction, PrintAction, Action
+from actionwire.action import (
+    BrightnessAction,
+    FlashAction,
+    PrintAction,
+    Action,
+    ColorAction,
+)
 from actionwire.light import LifxLightController, AbsLightController
 from actionwire.rule import KeyRule
 from actionwire.data_types import Match
@@ -16,10 +23,16 @@ def subscribe(action: Action):
     action.do()
 
 
+def swap[T](pair: list[T], _) -> list[T]:
+    return [pair[1], pair[0]]
+
+
 def create_events(source: Observable[Match]) -> Observable[Action]:
-    p_light = LifxLightController(config.lights[0], name="Philosopher", brightness=50)
+    p_light = LifxLightController(
+        config.lights[0], name="Philosopher", brightness=2 << 14
+    )
     w_light = LifxLightController(
-        config.lights[1], name="Who is the speaker", brightness=50
+        config.lights[1], name="Who is the speaker", brightness=2 << 14
     )
 
     # 自己
@@ -32,7 +45,15 @@ def create_events(source: Observable[Match]) -> Observable[Action]:
     # 醒來
     wake_stream = source.pipe(
         ops.filter(lambda match: match.word == "醒来"),
-        ops.map(lambda _: BrightnessAction(p_light, config.brightness_step)),
+        ops.scan(swap, [p_light, w_light]),
+        ops.flat_map(
+            lambda pair: [
+                ColorAction(pair[0], config.WHITE, config.brightness_step),
+                # BrightnessAction(pair[0], config.brightness_step),
+                ColorAction(pair[1], config.YELLOW, -config.brightness_step),
+                # BrightnessAction(pair[1], -config.brightness_step),
+            ]
+        ),
     )
 
     # 轉換

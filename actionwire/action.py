@@ -37,7 +37,21 @@ class FlashAction(Action):
 
     @override
     def do(self):
-        original = self.controller.brightness
-        self.controller.set_brightness(100, duration=200)
+        original = self.controller.brightness()
+        self.controller.set_brightness(2 << 15, duration=200)
         sleep(self.length)
         self.controller.set_brightness(original, duration=200)
+
+
+class ColorAction(Action):
+    def __init__(self, controller: LifxLightController, color: list[int], diff: int):
+        super().__init__()
+        self.controller: LifxLightController = controller
+        self.color: list[int] = color
+        self.diff: int = diff
+
+    @override
+    def do(self):
+        brightness = self.controller.brightness()
+        color = [self.color[0], self.color[1], brightness + self.diff, self.color[2]]
+        self.controller.set_color(color, duration=500)
