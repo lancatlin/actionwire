@@ -17,6 +17,7 @@ jieba = "^0.42.1"
 numpy = "^2.3.3"
 lifxlan = {git = "https://github.com/mclarkk/lifxlan", rev = "master"}
 python-socketio = "^5.13.0"
+requests = "^2.32.5"
 
 
 [tool.poetry.group.dev.dependencies]
