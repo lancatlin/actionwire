@@ -12,6 +12,7 @@ from actionwire.action import (
     PrintAction,
     Action,
     ColorAction,
+    SwapColorAction,
 )
 from actionwire.light import LifxLightController, AbsLightController
 from actionwire.rule import KeyRule
@@ -29,10 +30,12 @@ def swap[T](pair: list[T], _) -> list[T]:
 
 def create_events(source: Observable[Match]) -> Observable[Action]:
     p_light = LifxLightController(
-        config.lights[0], name="Philosopher", brightness=20000
+        config.lights[0], name="Philosopher", brightness=config.initial_brightness
     )
     w_light = LifxLightController(
-        config.lights[1], name="Who is the speaker", brightness=20000
+        config.lights[1],
+        name="Who is the speaker",
+        brightness=config.initial_brightness,
     )
 
     # 自己
@@ -72,8 +75,8 @@ def create_events(source: Observable[Match]) -> Observable[Action]:
         ops.filter(lambda match: match.word == "就像你"),
         ops.flat_map(
             lambda _: rx.of(
-                BrightnessAction(p_light, config.brightness_step),
-                BrightnessAction(w_light, -config.brightness_step),
+                SwapColorAction(p_light, [config.WHITE, config.YELLOW]),
+                SwapColorAction(w_light, [config.YELLOW, config.WHITE]),
             )
         ),
     )

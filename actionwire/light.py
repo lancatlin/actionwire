@@ -14,6 +14,9 @@ class AbsLightController:
     def brightness(self) -> int:
         return self.color[2]
 
+    def saturation(self) -> int:
+        return self.color[1]
+
     def adjust_brightness(self, diff: int):
         self.set_brightness(self.brightness() + diff)
         print(f"{self.name} brightness: change {diff}. Now {self.brightness()}")

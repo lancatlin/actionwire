@@ -59,3 +59,19 @@ class ColorAction(Action):
         self.controller.set_color(self.color)
         self.controller.set_brightness(brightness)
         self.controller.sync(500)
+
+
+class SwapColorAction(Action):
+    def __init__(self, controller: LifxLightController, colors: list[list[int]]):
+        super().__init__()
+        self.controller: LifxLightController = controller
+        self.colors: list[list[int]] = colors
+
+    @override
+    def do(self):
+        saturation = self.controller.saturation()
+        for color in self.colors:
+            if color[1] != saturation:
+                self.controller.set_color(color)
+                self.controller.sync(500)
+                break
