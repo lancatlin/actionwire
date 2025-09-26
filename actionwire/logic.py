@@ -25,7 +25,8 @@ def create_events(source: Observable[Match]) -> Observable[Action]:
     # 自己
     self_stream = source.pipe(
         ops.filter(lambda match: match.word == "自己"),
-        ops.map(lambda match: FlashAction(p_light, 0.5)),
+        ops.throttle_first(3),
+        ops.map(lambda match: FlashAction(p_light, 0.4)),
     )
 
     # 醒來
