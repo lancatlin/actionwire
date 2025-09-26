@@ -21,7 +21,7 @@ keywords = [
 
 lights = [("D0:73:D5:89:63:7B", "10.0.0.244"), ("D0:73:D5:89:C7:86", "10.0.0.228")]
 
-brightness_step = 2 << 14
+brightness_step = 10000
 
 # Hue, Saturation, Brightness, Kelvin
 RED = [65535, 65535, 65535, 3500]

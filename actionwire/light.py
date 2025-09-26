@@ -20,7 +20,7 @@ class AbsLightController:
 
     def set_brightness(self, brightness: int):
         new_brightness = min(max(brightness, 0), MAX_BRIGHTNESS)
-        self.set_color([self.color[0], self.color[1], new_brightness, self.color[3]])
+        self.color = [self.color[0], self.color[1], new_brightness, self.color[3]]
 
     def set_color(self, color: list[int]):
         self.color = [color[0], color[1], self.brightness(), color[3]]
@@ -31,21 +31,10 @@ class LifxLightController(AbsLightController):
     def __init__(self, addr: tuple[str, str], **kwargs):
         self.light: Light = Light(addr[0], addr[1])
         super().__init__(**kwargs)
-        self._sync()
+        self.sync()
 
-    @override
-    def set_brightness(self, brightness: int, duration: int = 1000):
-        super().set_brightness(brightness)
-        # self.light.set_brightness(self._normalize(self.brightness), duration=duration)
-        self._sync(duration)
-
-    def _sync(self, duration: int = 0):
+    def sync(self, duration: int = 0):
         self.light.set_color(self.color, duration=duration)
-
-    @override
-    def set_color(self, color: list[int], duration: int = 0):
-        super().set_color(color)
-        self._sync(duration)
 
     @staticmethod
     def _normalize(brightness: int) -> int:

@@ -27,6 +27,7 @@ class BrightnessAction(Action):
     @override
     def do(self):
         self.controller.adjust_brightness(self.diff)
+        self.controller.sync()
 
 
 class FlashAction(Action):
@@ -38,9 +39,11 @@ class FlashAction(Action):
     @override
     def do(self):
         original = self.controller.brightness()
-        self.controller.set_brightness(2 << 15, duration=200)
+        self.controller.set_brightness(2 << 15)
+        self.controller.sync(200)
         sleep(self.length)
-        self.controller.set_brightness(original, duration=200)
+        self.controller.set_brightness(original)
+        self.controller.sync(200)
 
 
 class ColorAction(Action):
@@ -52,6 +55,7 @@ class ColorAction(Action):
 
     @override
     def do(self):
-        brightness = self.controller.brightness()
-        color = [self.color[0], self.color[1], brightness + self.diff, self.color[2]]
-        self.controller.set_color(color, duration=500)
+        brightness = self.controller.brightness() + self.diff
+        self.controller.set_color(self.color)
+        self.controller.set_brightness(brightness)
+        self.controller.sync(500)

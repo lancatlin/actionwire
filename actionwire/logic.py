@@ -29,10 +29,10 @@ def swap[T](pair: list[T], _) -> list[T]:
 
 def create_events(source: Observable[Match]) -> Observable[Action]:
     p_light = LifxLightController(
-        config.lights[0], name="Philosopher", brightness=2 << 14
+        config.lights[0], name="Philosopher", brightness=20000
     )
     w_light = LifxLightController(
-        config.lights[1], name="Who is the speaker", brightness=2 << 14
+        config.lights[1], name="Who is the speaker", brightness=20000
     )
 
     # 自己
