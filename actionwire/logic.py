@@ -17,6 +17,7 @@ from actionwire.action import (
 from actionwire.light import LifxLightController, AbsLightController
 from actionwire.rule import KeyRule
 from actionwire.data_types import Match
+from actionwire.synchan import SynchanState, create_synchan
 
 
 def subscribe(action: Action):
@@ -28,7 +29,9 @@ def swap[T](pair: list[T], _) -> list[T]:
     return [pair[1], pair[0]]
 
 
-def create_events(source: Observable[Match]) -> Observable[Action]:
+def create_events(
+    keywords: Observable[Match], timecodes: Observable[SynchanState]
+) -> Observable[Action]:
     p_light = LifxLightController(
         config.lights[0], name="Philosopher", brightness=config.initial_brightness
     )
@@ -39,14 +42,14 @@ def create_events(source: Observable[Match]) -> Observable[Action]:
     )
 
     # 自己
-    self_stream = source.pipe(
+    self_stream = keywords.pipe(
         ops.filter(lambda match: match.word == "自己"),
         ops.throttle_first(3),
         ops.map(lambda match: FlashAction(p_light, 0.4)),
     )
 
     # 醒來
-    wake_stream = source.pipe(
+    wake_stream = keywords.pipe(
         ops.filter(lambda match: match.word == "醒来"),
         ops.scan(swap, [p_light, w_light]),
         ops.flat_map(
@@ -58,7 +61,7 @@ def create_events(source: Observable[Match]) -> Observable[Action]:
     )
 
     # 轉換
-    change_stream = source.pipe(
+    change_stream = keywords.pipe(
         ops.filter(lambda match: match.word == "转换"),
         ops.scan(swap, [p_light, w_light]),
         ops.flat_map(
@@ -70,7 +73,7 @@ def create_events(source: Observable[Match]) -> Observable[Action]:
     )
 
     # 就像你
-    like_you_stream = source.pipe(
+    like_you_stream = keywords.pipe(
         ops.filter(lambda match: match.word == "就像你"),
         ops.flat_map(
             lambda _: rx.of(
@@ -81,15 +84,27 @@ def create_events(source: Observable[Match]) -> Observable[Action]:
     )
 
     # 喝茶
-    tea_stream = source.pipe(
+    tea_stream = keywords.pipe(
         ops.filter(lambda match: match.word == "喝茶"),
         ops.map(lambda match: PrintAction(f"喝茶: {match.timecode()}")),
     )
 
     # 喝這杯水
-    drink_stream = source.pipe(
+    drink_stream = keywords.pipe(
         ops.filter(lambda match: match.word in ["喝这杯水", "喝杯水"]),
         ops.map(lambda match: PrintAction(f"喝這杯水: {match.timecode()}")),
+    )
+
+    # Timecode testing
+    #
+    timecode = timecodes.pipe(
+        ops.map(lambda state: state.currentTime),
+        ops.filter(lambda currentTime: currentTime > 10),
+        ops.map(
+            lambda currentTime: PrintAction(
+                f"Current Time is greater than 10: {currentTime}"
+            )
+        ),
     )
 
     return rx.merge(
@@ -99,6 +114,7 @@ def create_events(source: Observable[Match]) -> Observable[Action]:
         wake_stream,
         like_you_stream,
         drink_stream,
+        timecode,
     )
 
 
@@ -120,7 +136,7 @@ def from_audio_file(file: str):
         scanner = matching.KeywordScanner(config.keywords)
         keyword_stream = scanner.scan(detection_stream)
 
-        create_events(keyword_stream).subscribe(subscribe)
+        create_events(keyword_stream, create_synchan()).subscribe(subscribe)
 
 
 def from_mic():
@@ -132,7 +148,7 @@ def from_mic():
     keyword_stream = scanner.scan(detection_stream)
 
     keyword_stream.subscribe(print)
-    create_events(keyword_stream).subscribe(subscribe)
+    create_events(keyword_stream, create_synchan()).subscribe(subscribe)
 
 
 def from_csv():
@@ -140,7 +156,7 @@ def from_csv():
     scanner = matching.KeywordScanner(config.keywords)
     keyword_stream = scanner.scan(detection_stream)
 
-    create_events(keyword_stream).subscribe(subscribe)
+    create_events(keyword_stream, create_synchan()).subscribe(subscribe)
 
 
 if __name__ == "__main__":

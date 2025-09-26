@@ -37,3 +37,7 @@ WHITE = [58275, 0, 65535, 5500]
 COLD_WHITE = [58275, 0, 65535, 9000]
 WARM_WHITE = [58275, 0, 65535, 3200]
 GOLD = [58275, 0, 65535, 2500]
+
+# Synchan Settings
+
+SYNCHAN_URL = "http://localhost:3000"

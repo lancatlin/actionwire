@@ -2,7 +2,10 @@ from dataclasses import dataclass
 import reactivex
 from reactivex.abc.observer import ObserverBase
 from reactivex.observable import Observable
+from reactivex.operators import share
 import socketio
+
+from actionwire import config
 
 
 @dataclass
@@ -23,7 +26,6 @@ def create_socket(observer: ObserverBase[SynchanState], scheduler):
 
     @sio.event
     def control(data):
-        print("message received with ", data)
         nonce = data["nonce"]
         observer.on_next(
             SynchanState(
@@ -41,12 +43,12 @@ def create_socket(observer: ObserverBase[SynchanState], scheduler):
         print("disconnected from server")
         observer.on_completed()
 
-    sio.connect("http://localhost:3000")
+    sio.connect(config.SYNCHAN_URL)
     sio.wait()
 
 
 def create_synchan() -> Observable[SynchanState]:
-    return reactivex.create(create_socket)
+    return reactivex.create(create_socket).pipe(share())
 
 
 if __name__ == "__main__":
