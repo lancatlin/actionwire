@@ -55,9 +55,8 @@ class ColorAction(Action):
 
     @override
     def do(self):
-        brightness = self.controller.brightness() + self.diff
         self.controller.set_color(self.color)
-        self.controller.set_brightness(brightness)
+        self.controller.adjust_brightness(self.diff)
         self.controller.sync(500)
 
 
@@ -69,9 +68,10 @@ class SwapColorAction(Action):
 
     @override
     def do(self):
+        hue = self.controller.hue()
         saturation = self.controller.saturation()
         for color in self.colors:
-            if color[1] != saturation:
+            if not (color[0] == hue and color[1] == saturation):
                 self.controller.set_color(color)
                 self.controller.sync(500)
                 break

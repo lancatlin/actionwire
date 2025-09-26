@@ -52,9 +52,7 @@ def create_events(source: Observable[Match]) -> Observable[Action]:
         ops.flat_map(
             lambda pair: [
                 ColorAction(pair[0], config.WHITE, config.brightness_step),
-                # BrightnessAction(pair[0], config.brightness_step),
                 ColorAction(pair[1], config.YELLOW, -config.brightness_step),
-                # BrightnessAction(pair[1], -config.brightness_step),
             ]
         ),
     )
@@ -62,11 +60,12 @@ def create_events(source: Observable[Match]) -> Observable[Action]:
     # 轉換
     change_stream = source.pipe(
         ops.filter(lambda match: match.word == "转换"),
-        ops.scan(lambda last, _: -last, config.brightness_step),
+        ops.scan(swap, [p_light, w_light]),
         ops.flat_map(
-            lambda value: rx.of(
-                BrightnessAction(p_light, -value), BrightnessAction(w_light, value)
-            )
+            lambda pair: [
+                ColorAction(pair[0], config.YELLOW, -config.brightness_step),
+                ColorAction(pair[1], config.ORANGE, config.brightness_step),
+            ]
         ),
     )
 

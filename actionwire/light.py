@@ -14,6 +14,9 @@ class AbsLightController:
     def brightness(self) -> int:
         return self.color[2]
 
+    def hue(self) -> int:
+        return self.color[0]
+
     def saturation(self) -> int:
         return self.color[1]
 
