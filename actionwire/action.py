@@ -2,6 +2,7 @@ from time import sleep
 from typing import final, override
 from actionwire.light import AbsLightController
 from actionwire.synchan import SynchanController
+from actionwire.utils import parse_timecode
 
 
 class Action:
@@ -79,10 +80,13 @@ class SwapColorAction(Action):
 
 
 class SeekAction(Action):
-    def __init__(self, controller: SynchanController, target: int) -> None:
+    def __init__(self, controller: SynchanController, target: int | str) -> None:
         super().__init__()
-        self.controller = controller
-        self.target = target
+        self.controller: SynchanController = controller
+        if isinstance(target, str):
+            self.target: int = parse_timecode(target)
+        else:
+            self.target = target
 
     def do(self):
         self.controller.seek(self.target)
