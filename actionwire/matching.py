@@ -58,7 +58,7 @@ def load_detections(file_path) -> list[Detection]:
             for row in reader:
                 if row['timecode'] and row['keyword']:  # Skip empty rows
                     detections.append(Detection(
-                        utils.parse_timecode(row['timecode']),
+                        utils.tc(row['timecode']),
                         row['keyword'],
                         float(row['confidence']),
                     ))

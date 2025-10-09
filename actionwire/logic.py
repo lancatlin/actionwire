@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import TypeVar
 import reactivex as rx
 from reactivex.observable.observable import Observable
@@ -15,7 +16,7 @@ from actionwire.action import (
 from actionwire.light import AbsLightController
 from actionwire.data_types import Match
 from actionwire.synchan import SynchanController, SynchanState
-from actionwire.utils import format_timecode, parse_timecode
+from actionwire.utils import format_timecode, tc
 
 
 T = TypeVar('T')
@@ -82,12 +83,11 @@ def create_events(
 
     # 喝茶
     tea_stream: Observable[Action] = keywords.pipe(
-        ops.do_action(lambda match: print("Found match: ", match)),
         ops.filter(lambda match: match.word == "喝茶"),
         ops.with_latest_from(current_times),
         # 避免影片「喝這杯水」誤觸
         ops.filter(
-            lambda t: t[1] < parse_timecode("12:26") or t[1] > parse_timecode("12:55")
+            lambda t: t[1] > tc("00:30")
         ),
         ops.throttle_first(10),
         ops.flat_map(
@@ -102,10 +102,25 @@ def create_events(
         ),
     )
 
+    @dataclass
+    class DrinkState:
+        triggered: bool
+        emit: bool
+
+    def drink_reducer(state: DrinkState, t) -> DrinkState:
+        if state.triggered and t > tc("20:00"):
+            return DrinkState(False, False)
+
+        if not state.triggered and t > tc("12:49") and t < tc("12:59"):
+            return DrinkState(True, True)
+
+        return DrinkState(state.triggered, False)
+
     # 喝這杯水
-    drink_stream = keywords.pipe(
-        ops.filter(lambda match: match.word in ["喝这杯水", "喝杯水"]),
-        ops.map(lambda match: PrintAction(f"喝這杯水: {match.timecode()}")),
+    drink_stream = current_times.pipe(
+        ops.scan(drink_reducer, DrinkState(False, False)),
+        ops.filter(lambda state: state.emit),
+        ops.map(lambda state: SeekAction(synchan, tc("00:24")))
     )
 
     # Timecode testing

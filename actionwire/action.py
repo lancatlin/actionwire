@@ -1,7 +1,7 @@
 from time import sleep
 from actionwire.light import AbsLightController
 from actionwire.synchan import SynchanController
-from actionwire.utils import parse_timecode
+from actionwire.utils import tc
 
 
 class Action:
@@ -79,7 +79,7 @@ class SeekAction(Action):
         super().__init__()
         self.controller: SynchanController = controller
         if isinstance(target, str):
-            self.target: int = parse_timecode(target)
+            self.target: int = tc(target)
         else:
             self.target = target
 
