@@ -82,16 +82,19 @@ def create_events(
         ops.do_action(lambda match: print("Found match: ", match)),
         ops.filter(lambda match: match.word == "喝茶"),
         ops.with_latest_from(current_times),
-        # ops.filter(lambda t: t[1] < parse_timecode("12:26")),
+        # 避免影片「喝這杯水」誤觸
+        ops.filter(
+            lambda t: t[1] < parse_timecode("12:26") or t[1] > parse_timecode("12:55")
+        ),
         ops.throttle_first(10),
         ops.flat_map(
-            lambda _: rx.merge(
+            lambda t: rx.merge(
                 rx.of(
                     SeekAction(synchan, "00:24"),
                     BrightnessAction(p_light, -config.brightness_step),
                     BrightnessAction(w_light, config.brightness_step),
                 ),
-                rx.timer(10).pipe(ops.map(lambda _: SeekAction(synchan, "12:26"))),
+                rx.timer(10).pipe(ops.map(lambda _: SeekAction(synchan, t[1]))),
             )
         ),
     )
