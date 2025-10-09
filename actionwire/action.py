@@ -1,5 +1,4 @@
 from time import sleep
-from typing import final, override
 from actionwire.light import AbsLightController
 from actionwire.synchan import SynchanController
 from actionwire.utils import parse_timecode
@@ -26,7 +25,6 @@ class BrightnessAction(Action):
         self.controller = controller
         self.diff = diff
 
-    @override
     def do(self):
         self.controller.adjust_brightness(self.diff)
         self.controller.sync(200)
@@ -38,7 +36,6 @@ class FlashAction(Action):
         self.controller: AbsLightController = controller
         self.length: float = length
 
-    @override
     def do(self):
         original = self.controller.brightness()
         self.controller.set_brightness(2 << 15)
@@ -55,7 +52,6 @@ class ColorAction(Action):
         self.color: list[int] = color
         self.diff: int = diff
 
-    @override
     def do(self):
         self.controller.set_color(self.color)
         self.controller.adjust_brightness(self.diff)
@@ -68,7 +64,6 @@ class SwapColorAction(Action):
         self.controller: AbsLightController = controller
         self.colors: list[list[int]] = colors
 
-    @override
     def do(self):
         hue = self.controller.hue()
         saturation = self.controller.saturation()

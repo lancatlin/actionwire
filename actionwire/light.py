@@ -1,4 +1,3 @@
-from typing import override
 from actionwire.config import WHITE
 from lifxlan import Light  # type:ignore
 
