@@ -618,18 +618,20 @@ docs = ["sphinx"]
 
 [[package]]
 name = "python-socketio"
-version = "5.13.0"
+version = "5.14.1"
 description = "Socket.IO server and client for Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "python_socketio-5.13.0-py3-none-any.whl", hash = "sha256:51f68d6499f2df8524668c24bcec13ba1414117cfb3a90115c559b601ab10caf"},
-    {file = "python_socketio-5.13.0.tar.gz", hash = "sha256:ac4e19a0302ae812e23b712ec8b6427ca0521f7c582d6abb096e36e24a263029"},
+    {file = "python_socketio-5.14.1-py3-none-any.whl", hash = "sha256:3419f5917f0e3942317836a77146cb4caa23ad804c8fd1a7e3f44a6657a8406e"},
+    {file = "python_socketio-5.14.1.tar.gz", hash = "sha256:bf49657073b90ee09e4cbd6651044b46bb526694276621e807a1b8fcc0c1b25b"},
 ]
 
 [package.dependencies]
 bidict = ">=0.21.0"
 python-engineio = ">=4.11.0"
+requests = {version = ">=2.21.0", optional = true, markers = "extra == \"client\""}
+websocket-client = {version = ">=0.54.0", optional = true, markers = "extra == \"client\""}
 
 [package.extras]
 asyncio-client = ["aiohttp (>=3.4)"]
@@ -817,6 +819,22 @@ tqdm = "*"
 websockets = "*"
 
 [[package]]
+name = "websocket-client"
+version = "1.9.0"
+description = "WebSocket client for Python with low level API options"
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "websocket_client-1.9.0-py3-none-any.whl", hash = "sha256:af248a825037ef591efbf6ed20cc5faa03d3b47b9e5a2230a529eeee1c1fc3ef"},
+    {file = "websocket_client-1.9.0.tar.gz", hash = "sha256:9e813624b6eb619999a97dc7958469217c3176312b3a16a4bd1bc7e08a46ec98"},
+]
+
+[package.extras]
+docs = ["Sphinx (>=6.0)", "myst-parser (>=2.0.0)", "sphinx_rtd_theme (>=1.1.0)"]
+optional = ["python-socks", "wsaccel"]
+test = ["pytest", "websockets"]
+
+[[package]]
 name = "websockets"
 version = "15.0.1"
 description = "An implementation of the WebSocket Protocol (RFC 6455 & 7692)"
@@ -911,4 +929,4 @@ h11 = ">=0.9.0,<1"
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<4.0"
-content-hash = "c559b4bf8799046209cb8c3214502efa21e2d1bd14dc1998bb5eee6277c04084"
+content-hash = "f7aa9307895ead0a4ad7aba554d64d9bd9f64ddbd4c6bd7d96d5a09c5a5e9692"

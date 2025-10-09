@@ -27,6 +27,7 @@ def create_events(
     w_light: AbsLightController,
     synchan: SynchanController,
 ) -> Observable[Action]:
+    print("create logic")
     # 自己
     self_stream = keywords.pipe(
         ops.filter(lambda match: match.word == "自己"),

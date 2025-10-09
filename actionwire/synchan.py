@@ -43,6 +43,12 @@ def create_socket(observer: ObserverBase[SynchanState], scheduler):
         print("connection established")
 
     @sio.event
+    def connect_error(data):
+        print(f"connection failed: {data}")
+        observer.on_error(data)
+        observer.on_completed()
+
+    @sio.event
     def control(data):
         nonce = data["nonce"]
         observer.on_next(
@@ -61,7 +67,8 @@ def create_socket(observer: ObserverBase[SynchanState], scheduler):
         print("disconnected from server")
         observer.on_completed()
 
-    sio.connect(config.SYNCHAN_URL)
+    print(f"Connecting to synchan at {config.SYNCHAN_URL}")
+    sio.connect(config.SYNCHAN_URL, wait_timeout=5)
     sio.wait()
 
 

@@ -32,7 +32,7 @@ def callback(keyword_stream: Observable[Match]):
     print("Create events")
     create_events(
         keyword_stream, create_synchan(), p_light, w_light, synchan
-    ).subscribe(subscribe)
+    ).subscribe(on_next=subscribe, on_error=print)
 
 
 def from_audio_file(file: str, cb: Callable[[Observable[Match]], None]):

@@ -6,7 +6,7 @@ import reactivex.operators as ops
 import sounddevice as sd  # type: ignore
 from reactivex.abc import DisposableBase, ObserverBase, SchedulerBase, disposable
 
-import config
+from actionwire import config
 
 
 def create_mic(observer: ObserverBase[bytes], scheduler):
