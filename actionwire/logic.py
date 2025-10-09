@@ -71,9 +71,14 @@ def create_events(
     )
 
     # 喝茶
-    tea_stream = keywords.pipe(
+    tea_stream: Observable[Action] = keywords.pipe(
         ops.filter(lambda match: match.word == "喝茶"),
-        ops.map(lambda match: SeekAction(synchan, 24)),
+        ops.flat_map(
+            lambda match: rx.merge(
+                rx.of(SeekAction(synchan, 24)),
+                rx.timer(10).pipe(ops.map(lambda _: SeekAction(synchan, 100))),
+            )
+        ),
     )
 
     # 喝這杯水
