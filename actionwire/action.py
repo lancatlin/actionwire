@@ -29,7 +29,7 @@ class BrightnessAction(Action):
     @override
     def do(self):
         self.controller.adjust_brightness(self.diff)
-        self.controller.sync()
+        self.controller.sync(200)
 
 
 class FlashAction(Action):

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import reactivex
 from reactivex.abc.observer import ObserverBase
 from reactivex.observable import Observable
-from reactivex.operators import share
+import reactivex.operators as ops
 import requests
 import socketio
 
@@ -73,7 +73,9 @@ def create_socket(observer: ObserverBase[SynchanState], scheduler):
 
 
 def create_synchan() -> Observable[SynchanState]:
-    return reactivex.create(create_socket).pipe(share())
+    return reactivex.create(create_socket).pipe(
+        ops.share(), ops.subscribe_on(config.thread_pool_scheduler)
+    )
 
 
 if __name__ == "__main__":

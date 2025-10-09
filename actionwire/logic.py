@@ -14,6 +14,7 @@ from actionwire.action import (
 from actionwire.light import AbsLightController
 from actionwire.data_types import Match
 from actionwire.synchan import SynchanController, SynchanState
+from actionwire.utils import format_timecode, parse_timecode
 
 
 def swap[T](pair: list[T], _) -> list[T]:
@@ -28,6 +29,12 @@ def create_events(
     synchan: SynchanController,
 ) -> Observable[Action]:
     print("create logic")
+
+    current_times = timecodes.pipe(
+        ops.map(lambda state: state.currentTime),
+        ops.share(),
+    )
+
     # 自己
     self_stream = keywords.pipe(
         ops.filter(lambda match: match.word == "自己"),
@@ -72,11 +79,18 @@ def create_events(
 
     # 喝茶
     tea_stream: Observable[Action] = keywords.pipe(
+        ops.do_action(lambda match: print("Found match: ", match)),
         ops.filter(lambda match: match.word == "喝茶"),
+        ops.with_latest_from(current_times),
+        # ops.filter(lambda t: t[1] < parse_timecode("12:26")),
         ops.throttle_first(10),
         ops.flat_map(
-            lambda match: rx.merge(
-                rx.of(SeekAction(synchan, "00:24")),
+            lambda _: rx.merge(
+                rx.of(
+                    SeekAction(synchan, "00:24"),
+                    BrightnessAction(p_light, -config.brightness_step),
+                    BrightnessAction(w_light, config.brightness_step),
+                ),
                 rx.timer(10).pipe(ops.map(lambda _: SeekAction(synchan, "12:26"))),
             )
         ),
@@ -90,12 +104,10 @@ def create_events(
 
     # Timecode testing
     #
-    timecode = timecodes.pipe(
-        ops.map(lambda state: state.currentTime),
-        ops.filter(lambda currentTime: currentTime > 10),
+    timecode = current_times.pipe(
         ops.map(
             lambda currentTime: PrintAction(
-                f"Current Time is greater than 10: {currentTime}"
+                f"Current Time: {format_timecode(currentTime)}"
             )
         ),
     )

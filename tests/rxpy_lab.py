@@ -7,6 +7,8 @@ from reactivex.scheduler.eventloop import AsyncIOScheduler
 from reactivex.subject.subject import Subject
 import multiprocessing
 
+from actionwire.synchan import create_synchan
+
 thread_count = multiprocessing.cpu_count()
 thread_pool_scheduler = scheduler.ThreadPoolScheduler(thread_count)
 print("Cpu count is : {0}".format(thread_count))
@@ -48,9 +50,16 @@ with_delay = rx.timer(0, 5, thread_pool_scheduler).pipe(
             rx.of(f"immediate: {i}"),
             rx.timer(1.0).pipe(ops.map(lambda _: f"delayed: {i}")),
         )
-    )
+    ),
+    ops.share(),
 )
 
-with_delay.subscribe(print)
+# with_delay.subscribe(print)
+
+timecodes = create_synchan()
+
+b_timer = rx.timer(0, 1).pipe(ops.with_latest_from(timecodes))
+
+b_timer.subscribe(print)
 
 # input("Enter any key to exit")
