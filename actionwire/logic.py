@@ -1,3 +1,4 @@
+from typing import TypeVar
 import reactivex as rx
 from reactivex.observable.observable import Observable
 import reactivex.operators as ops
@@ -17,7 +18,9 @@ from actionwire.synchan import SynchanController, SynchanState
 from actionwire.utils import format_timecode, parse_timecode
 
 
-def swap[T](pair: list[T], _) -> list[T]:
+T = TypeVar('T')
+
+def swap(pair: list[T], _) -> list[T]:
     return [pair[1], pair[0]]
 
 
