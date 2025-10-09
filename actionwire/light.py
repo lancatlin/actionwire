@@ -32,6 +32,9 @@ class AbsLightController:
         self.color = [color[0], color[1], self.brightness(), color[3]]
         print(f"{self.name} color: Now {self.color}")
 
+    def sync(self, duration: int = 200):
+        pass
+
 
 class LifxLightController(AbsLightController):
     def __init__(self, addr: tuple[str, str], **kwargs):

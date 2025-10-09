@@ -1,6 +1,6 @@
 from time import sleep
 from typing import final, override
-from actionwire.light import LifxLightController
+from actionwire.light import AbsLightController
 from actionwire.synchan import SynchanController
 
 
@@ -21,7 +21,7 @@ class PrintAction(Action):
 
 
 class BrightnessAction(Action):
-    def __init__(self, controller: LifxLightController, diff: int):
+    def __init__(self, controller: AbsLightController, diff: int):
         self.controller = controller
         self.diff = diff
 
@@ -32,9 +32,9 @@ class BrightnessAction(Action):
 
 
 class FlashAction(Action):
-    def __init__(self, controller: LifxLightController, length: float = 0.5):
+    def __init__(self, controller: AbsLightController, length: float = 0.5):
         super().__init__()
-        self.controller: LifxLightController = controller
+        self.controller: AbsLightController = controller
         self.length: float = length
 
     @override
@@ -48,9 +48,9 @@ class FlashAction(Action):
 
 
 class ColorAction(Action):
-    def __init__(self, controller: LifxLightController, color: list[int], diff: int):
+    def __init__(self, controller: AbsLightController, color: list[int], diff: int):
         super().__init__()
-        self.controller: LifxLightController = controller
+        self.controller: AbsLightController = controller
         self.color: list[int] = color
         self.diff: int = diff
 
@@ -62,9 +62,9 @@ class ColorAction(Action):
 
 
 class SwapColorAction(Action):
-    def __init__(self, controller: LifxLightController, colors: list[list[int]]):
+    def __init__(self, controller: AbsLightController, colors: list[list[int]]):
         super().__init__()
-        self.controller: LifxLightController = controller
+        self.controller: AbsLightController = controller
         self.colors: list[list[int]] = colors
 
     @override
