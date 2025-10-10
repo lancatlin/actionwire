@@ -19,7 +19,8 @@ from actionwire.synchan import SynchanController, SynchanState
 from actionwire.utils import format_timecode, tc
 
 
-T = TypeVar('T')
+T = TypeVar("T")
+
 
 def swap(pair: list[T], _) -> list[T]:
     return [pair[1], pair[0]]
@@ -86,9 +87,7 @@ def create_events(
         ops.filter(lambda match: match.word == "喝茶"),
         ops.with_latest_from(current_times),
         # 避免影片「喝這杯水」誤觸
-        ops.filter(
-            lambda t: t[1] > tc("00:30")
-        ),
+        ops.filter(lambda t: t[1] > tc("00:30")),
         ops.throttle_first(10),
         ops.flat_map(
             lambda t: rx.merge(
@@ -120,7 +119,20 @@ def create_events(
     drink_stream = current_times.pipe(
         ops.scan(drink_reducer, DrinkState(False, False)),
         ops.filter(lambda state: state.emit),
-        ops.map(lambda state: SeekAction(synchan, tc("00:24")))
+        ops.flat_map(
+            lambda t: rx.merge(
+                rx.of(
+                    SeekAction(synchan, "00:24"),
+                    BrightnessAction(p_light, -config.brightness_step),
+                    BrightnessAction(w_light, config.brightness_step),
+                ),
+                current_times.pipe(
+                    ops.filter(lambda t: t > tc("01:22")),
+                    ops.take(1),
+                    ops.map(lambda _: SeekAction(synchan, "12:26")),
+                ),
+            )
+        ),
     )
 
     # Timecode testing
