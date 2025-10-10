@@ -96,7 +96,15 @@ def create_events(
                     BrightnessAction(p_light, -config.brightness_step),
                     BrightnessAction(w_light, config.brightness_step),
                 ),
-                rx.timer(10).pipe(ops.map(lambda _: SeekAction(synchan, t[1]))),
+                rx.timer(15).pipe(
+                    ops.flat_map(
+                        lambda _: rx.of(
+                            SeekAction(synchan, t[1]),
+                            BrightnessAction(p_light, config.brightness_step),
+                            BrightnessAction(w_light, -config.brightness_step),
+                        )
+                    )
+                ),
             )
         ),
     )
@@ -129,7 +137,13 @@ def create_events(
                 current_times.pipe(
                     ops.filter(lambda t: t > tc("01:22")),
                     ops.take(1),
-                    ops.map(lambda _: SeekAction(synchan, "12:26")),
+                    ops.flat_map(
+                        lambda _: rx.of(
+                            SeekAction(synchan, "12:26"),
+                            BrightnessAction(p_light, config.brightness_step),
+                            BrightnessAction(w_light, -config.brightness_step),
+                        )
+                    ),
                 ),
             )
         ),
