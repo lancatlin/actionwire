@@ -20,11 +20,15 @@ def subscribe(action: Action):
 
 def callback(keyword_stream: Observable[Match]):
     p_light = LifxLightController(
-        config.lights[0], name="Philosopher", brightness=config.initial_brightness
+        config.lights[0],
+        name="Philosopher",
+        color=config.YELLOW,
+        brightness=config.initial_brightness,
     )
     w_light = LifxLightController(
         config.lights[1],
         name="Who is the speaker",
+        color=config.YELLOW,
         brightness=config.initial_brightness,
     )
     synchan = SynchanController()
