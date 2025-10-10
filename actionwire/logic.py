@@ -117,7 +117,7 @@ def create_events(
         ops.filter(
             lambda t: t[1] > tc("00:30")
             # 避免「特別差」誤觸
-            and not (t[1] >= tc("06:40") and t[1] <= tc("07:05"))
+            # and not (t[1] >= tc("06:30") and t[1] <= tc("07:10"))
         ),
         ops.throttle_first(15),
         ops.flat_map(
@@ -127,7 +127,8 @@ def create_events(
                     BrightnessAction(p_light, -config.brightness_step),
                     BrightnessAction(w_light, config.brightness_step),
                 ),
-                rx.timer(15).pipe(
+                # 8 秒後跳回原位置
+                rx.timer(8).pipe(
                     ops.flat_map(
                         lambda _: rx.of(
                             SeekAction(synchan, t[1]),

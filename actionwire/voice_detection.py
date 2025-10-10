@@ -25,8 +25,11 @@ words = [
     "自己",
     "醒来",
     "转换",
+    "差",
+    "常常",
     "[unk]",
 ]
+
 
 def create_vosk(framerate: int):
     model = Model(model_path="./data/vosk-model-small-cn-0.22")
@@ -38,6 +41,7 @@ def create_vosk(framerate: int):
     rec = KaldiRecognizer(model, framerate, keywords)
     rec.SetWords(True)
     rec.SetMaxAlternatives(0)
+
     def _vosk(source: rx.Observable[bytes]):
         def subscribe(observer: rx.Observer[object], scheduler):
             def on_next(frame: bytes):
@@ -52,31 +56,40 @@ def create_vosk(framerate: int):
                 on_next,
                 on_completed=observer.on_completed,
                 on_error=observer.on_error,
-                scheduler=scheduler
+                scheduler=scheduler,
             )
+
         return rx.create(subscribe)
+
     return _vosk
 
+
 def flatten_result(match: dict) -> rx.Observable[dict]:
-    if 'result' in match:
+    if "result" in match:
         return rx.from_list(match["result"], scheduler=ImmediateScheduler())
     else:
         # Skip results without word matches (e.g. partial results)
         return rx.empty()
 
+
 def high_confidence(result):
-    return result['conf'] > CONFIDENCE_THRESHOLD
+    return result["conf"] > CONFIDENCE_THRESHOLD
 
 
 def create_detection_stream(source: rx.Observable[dict]) -> rx.Observable[Detection]:
     return source.pipe(
         flat_map(flatten_result),
-        filter(lambda result: result['word'] != '[unk]'),
+        filter(lambda result: result["word"] != "[unk]"),
         filter(high_confidence),
-        map(lambda result: Detection(start=result['start'], word=result['word'], confidence=result['conf']))
+        map(
+            lambda result: Detection(
+                start=result["start"], word=result["word"], confidence=result["conf"]
+            )
+        ),
     )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     vosk_stream = mic.mic_stream.pipe(
         create_vosk(config.samplerate),
     )
