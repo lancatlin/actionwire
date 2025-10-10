@@ -8,7 +8,7 @@ from reactivex.observable import Observable
 from actionwire import config, convert_audio, matching, mic, voice_detection
 from actionwire.action import Action
 from actionwire.data_types import Match
-from actionwire.light import LifxLightController
+from actionwire.light import GroupLightController, LifxLightController
 from actionwire.logic import create_events
 from actionwire.synchan import SynchanController, create_synchan
 
@@ -19,14 +19,14 @@ def subscribe(action: Action):
 
 
 def callback(keyword_stream: Observable[Match]):
-    p_light = LifxLightController(
-        config.lights[0],
+    p_light = GroupLightController(
+        config.p_lights,
         name="Philosopher",
         color=config.YELLOW,
         brightness=config.initial_brightness,
     )
-    w_light = LifxLightController(
-        config.lights[1],
+    w_light = GroupLightController(
+        config.w_lights,
         name="Who is the speaker",
         color=config.YELLOW,
         brightness=config.initial_brightness,

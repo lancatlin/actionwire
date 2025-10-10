@@ -45,7 +45,33 @@ class LifxLightController(AbsLightController):
     def sync(self, duration: int = 0):
         self.light.set_color(self.color, duration=duration)
 
-    @staticmethod
-    def _normalize(brightness: int) -> int:
-        scaled = int(brightness / 100 * config.MAX_BRIGHTNESS)
-        return min(max(scaled, 0), config.MAX_BRIGHTNESS)
+
+class GroupLightController(AbsLightController):
+    def __init__(self, addrs: list[tuple[str, str]], **kwargs):
+        self.lights: list[AbsLightController] = []
+        for addr in addrs:
+            try:
+                light = LifxLightController(addr, **kwargs)
+                self.lights.append(light)
+            except Exception as e:
+                print(f"Cannot connect to light: {addr}", e)
+
+        super().__init__(**kwargs)
+        self.sync()
+
+    def sync(self, duration: int = 0):
+        for light in self.lights:
+            light.set_color(self.color)
+            light.set_brightness(self.brightness())
+            try:
+                light.sync(duration)
+            except Exception as e:
+                print(f"Cannot sync light: {light}", e)
+
+    # def set_brightness(self, brightness: int):
+    #     for light in self.lights:
+    #         light.set_brightness(brightness)
+
+    # def set_color(self, color: list[int]):
+    #     for light in self.lights:
+    #         light.set_color(color)
