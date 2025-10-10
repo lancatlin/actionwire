@@ -10,6 +10,7 @@ from actionwire.action import (
     PrintAction,
     Action,
     ColorAction,
+    ResetAction,
     SeekAction,
     SwapColorAction,
 )
@@ -20,6 +21,12 @@ from actionwire.utils import format_timecode, tc
 
 
 T = TypeVar("T")
+
+
+@dataclass
+class PlayState:
+    triggered: bool
+    emit: bool
 
 
 def swap(pair: list[T], _) -> list[T]:
@@ -38,6 +45,26 @@ def create_events(
     current_times = timecodes.pipe(
         ops.map(lambda state: state.currentTime),
         ops.share(),
+    )
+
+    def replay_reducer(state: PlayState, t: float) -> PlayState:
+        if t < 5 and not state.triggered:
+            return PlayState(True, True)
+
+        if t > tc("21:00"):
+            return PlayState(False, False)
+
+        return PlayState(state.triggered, False)
+
+    replay_stream = current_times.pipe(
+        ops.scan(replay_reducer, PlayState(False, False)),
+        ops.filter(lambda state: state.emit),
+        ops.flat_map(
+            lambda _: rx.of(
+                ResetAction(p_light),
+                ResetAction(w_light),
+            )
+        ),
     )
 
     # 自己
@@ -87,8 +114,12 @@ def create_events(
         ops.filter(lambda match: match.word == "喝茶"),
         ops.with_latest_from(current_times),
         # 避免影片「喝這杯水」誤觸
-        ops.filter(lambda t: t[1] > tc("00:30")),
-        ops.throttle_first(10),
+        ops.filter(
+            lambda t: t[1] > tc("00:30")
+            # 避免「特別差」誤觸
+            and not (t[1] >= tc("06:40") and t[1] <= tc("07:05"))
+        ),
+        ops.throttle_first(15),
         ops.flat_map(
             lambda t: rx.merge(
                 rx.of(
@@ -109,23 +140,18 @@ def create_events(
         ),
     )
 
-    @dataclass
-    class DrinkState:
-        triggered: bool
-        emit: bool
-
-    def drink_reducer(state: DrinkState, t) -> DrinkState:
+    def drink_reducer(state: PlayState, t) -> PlayState:
         if state.triggered and t > tc("20:00"):
-            return DrinkState(False, False)
+            return PlayState(False, False)
 
         if not state.triggered and t > tc("12:49") and t < tc("12:59"):
-            return DrinkState(True, True)
+            return PlayState(True, True)
 
-        return DrinkState(state.triggered, False)
+        return PlayState(state.triggered, False)
 
     # 喝這杯水
     drink_stream = current_times.pipe(
-        ops.scan(drink_reducer, DrinkState(False, False)),
+        ops.scan(drink_reducer, PlayState(False, False)),
         ops.filter(lambda state: state.emit),
         ops.flat_map(
             lambda t: rx.merge(
@@ -160,6 +186,7 @@ def create_events(
     )
 
     return rx.merge(
+        replay_stream,
         self_stream,
         change_stream,
         tea_stream,

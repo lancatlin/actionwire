@@ -1,8 +1,6 @@
+from actionwire import config
 from actionwire.config import WHITE
 from lifxlan import Light  # type:ignore
-
-MAX_BRIGHTNESS = 65535
-MIN_BRIGHTNESS = 10000
 
 
 class AbsLightController:
@@ -25,7 +23,9 @@ class AbsLightController:
         print(f"{self.name} brightness: change {diff}. Now {self.brightness()}")
 
     def set_brightness(self, brightness: int):
-        new_brightness = min(max(brightness, MIN_BRIGHTNESS), MAX_BRIGHTNESS)
+        new_brightness = min(
+            max(brightness, config.MIN_BRIGHTNESS), config.MAX_BRIGHTNESS
+        )
         self.color = [self.color[0], self.color[1], new_brightness, self.color[3]]
 
     def set_color(self, color: list[int]):
@@ -47,5 +47,5 @@ class LifxLightController(AbsLightController):
 
     @staticmethod
     def _normalize(brightness: int) -> int:
-        scaled = int(brightness / 100 * MAX_BRIGHTNESS)
-        return min(max(scaled, 0), MAX_BRIGHTNESS)
+        scaled = int(brightness / 100 * config.MAX_BRIGHTNESS)
+        return min(max(scaled, 0), config.MAX_BRIGHTNESS)

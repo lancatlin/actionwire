@@ -1,4 +1,5 @@
 from time import sleep
+from actionwire import config
 from actionwire.light import AbsLightController
 from actionwire.synchan import SynchanController
 from actionwire.utils import tc
@@ -20,6 +21,16 @@ class PrintAction(Action):
         print("Print action:", self.text)
 
 
+class ResetAction(Action):
+    def __init__(self, controller: AbsLightController):
+        self.controller = controller
+
+    def do(self):
+        self.controller.set_color(config.YELLOW)
+        self.controller.set_brightness(config.initial_brightness)
+        self.controller.sync(200)
+
+
 class BrightnessAction(Action):
     def __init__(self, controller: AbsLightController, diff: int):
         self.controller = controller
@@ -38,7 +49,10 @@ class FlashAction(Action):
 
     def do(self):
         original = self.controller.brightness()
-        self.controller.set_brightness(2 << 15)
+        new_brightness = (
+            config.MAX_BRIGHTNESS if original < 50000 else config.MIN_BRIGHTNESS
+        )
+        self.controller.set_brightness(new_brightness)
         self.controller.sync(200)
         sleep(self.length)
         self.controller.set_brightness(original)
