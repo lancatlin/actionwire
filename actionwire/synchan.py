@@ -45,8 +45,6 @@ def create_socket(observer: ObserverBase[SynchanState], scheduler):
     @sio.event
     def connect_error(data):
         print(f"connection failed: {data}")
-        observer.on_error(data)
-        observer.on_completed()
 
     @sio.event
     def control(data):
@@ -65,16 +63,17 @@ def create_socket(observer: ObserverBase[SynchanState], scheduler):
     @sio.event
     def disconnect():
         print("disconnected from server")
-        observer.on_completed()
 
     print(f"Connecting to synchan at {config.SYNCHAN_URL}")
-    sio.connect(config.SYNCHAN_URL, wait_timeout=5)
+    sio.connect(config.SYNCHAN_URL, wait_timeout=5, retry=True)
     sio.wait()
 
 
 def create_synchan() -> Observable[SynchanState]:
     return reactivex.create(create_socket).pipe(
-        ops.share(), ops.subscribe_on(config.thread_pool_scheduler)
+        ops.catch(lambda err, src: reactivex.of()),  # ignore the error
+        ops.share(),
+        ops.subscribe_on(config.thread_pool_scheduler),
     )
 
 
