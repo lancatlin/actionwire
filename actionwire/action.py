@@ -1,5 +1,6 @@
 from time import sleep
 from actionwire import config
+from actionwire.color import Color
 from actionwire.light import AbsLightController
 from actionwire.synchan import SynchanController
 from actionwire.utils import format_timecode, tc
@@ -32,7 +33,7 @@ class ResetAction(Action):
         return f"{type(self).__name__}: Reset {self.controller}"
 
     def do(self):
-        self.controller.set_color(config.YELLOW)
+        self.controller.set_color(config.INITIAL_COLOR)
         self.controller.set_brightness(config.initial_brightness)
         self.controller.sync(200)
 
@@ -72,10 +73,10 @@ class FlashAction(Action):
 
 
 class ColorAction(Action):
-    def __init__(self, controller: AbsLightController, color: list[int], diff: int):
+    def __init__(self, controller: AbsLightController, color: Color, diff: int):
         super().__init__()
         self.controller: AbsLightController = controller
-        self.color: list[int] = color
+        self.color: Color = color
         self.diff: int = diff
 
     def __str__(self) -> str:
@@ -88,10 +89,10 @@ class ColorAction(Action):
 
 
 class SwapColorAction(Action):
-    def __init__(self, controller: AbsLightController, colors: list[list[int]]):
+    def __init__(self, controller: AbsLightController, colors: list[Color]):
         super().__init__()
         self.controller: AbsLightController = controller
-        self.colors: list[list[int]] = colors
+        self.colors: list[Color] = colors
 
     def __str__(self) -> str:
         return (
@@ -99,10 +100,9 @@ class SwapColorAction(Action):
         )
 
     def do(self):
-        hue = self.controller.hue()
-        saturation = self.controller.saturation()
+        old_color = self.controller.color
         for color in self.colors:
-            if not (color[0] == hue and color[1] == saturation):
+            if color.name != old_color.name:
                 self.controller.set_color(color)
                 self.controller.sync(500)
                 break

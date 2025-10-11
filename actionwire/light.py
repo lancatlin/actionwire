@@ -1,13 +1,14 @@
 from typing import override
 from actionwire import config
+from actionwire.color import Color
 from actionwire.config import WHITE
 from lifxlan import Light  # type:ignore
 
 
 class AbsLightController:
-    def __init__(self, name: str = "", color: list[int] = WHITE, brightness: int = 50):
+    def __init__(self, name: str = "", color: Color = WHITE, brightness: int = 50):
         self.name: str = name
-        self.color: list[int] = color
+        self.color: Color = color
         self.set_brightness(brightness)
 
     @override
@@ -15,13 +16,13 @@ class AbsLightController:
         return self.name
 
     def brightness(self) -> int:
-        return self.color[2]
+        return self.color.brightness
 
     def hue(self) -> int:
-        return self.color[0]
+        return self.color.hue
 
     def saturation(self) -> int:
-        return self.color[1]
+        return self.color.saturation
 
     def adjust_brightness(self, diff: int):
         self.set_brightness(self.brightness() + diff)
@@ -30,10 +31,10 @@ class AbsLightController:
         new_brightness = min(
             max(brightness, config.MIN_BRIGHTNESS), config.MAX_BRIGHTNESS
         )
-        self.color = [self.color[0], self.color[1], new_brightness, self.color[3]]
+        self.color = self.color.set_brightness(brightness)
 
-    def set_color(self, color: list[int]):
-        self.color = [color[0], color[1], self.brightness(), color[3]]
+    def set_color(self, color: Color):
+        self.color = self.color.set_color(color)
 
     def sync(self, duration: int = 200):
         pass
@@ -46,7 +47,7 @@ class LifxLightController(AbsLightController):
         self.sync()
 
     def sync(self, duration: int = 0):
-        self.light.set_color(self.color, duration=duration)
+        self.light.set_color(self.color.code(), duration=duration)
 
 
 class GroupLightController(AbsLightController):
@@ -70,11 +71,3 @@ class GroupLightController(AbsLightController):
                 light.sync(duration)
             except Exception as e:
                 print(f"Cannot sync light: {light}", e)
-
-    # def set_brightness(self, brightness: int):
-    #     for light in self.lights:
-    #         light.set_brightness(brightness)
-
-    # def set_color(self, color: list[int]):
-    #     for light in self.lights:
-    #         light.set_color(color)
