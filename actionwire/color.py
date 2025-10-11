@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import override
 
 from actionwire import config
 
@@ -17,11 +16,9 @@ class Color:
         self.name = name
         [self.hue, self.saturation, self.brightness, self.kelvin] = color
 
-    @override
     def __str__(self) -> str:
         return f"Color: {self.name}"
 
-    @override
     def __repr__(self) -> str:
         return f"Color: {self.name}"
 

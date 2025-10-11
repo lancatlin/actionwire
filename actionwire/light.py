@@ -1,4 +1,3 @@
-from typing import override
 from actionwire import config
 from actionwire.color import Color
 from actionwire.config import WHITE
@@ -11,7 +10,6 @@ class AbsLightController:
         self.color: Color = color
         self.set_brightness(brightness)
 
-    @override
     def __str__(self) -> str:
         return self.name
 
