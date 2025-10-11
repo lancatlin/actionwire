@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import override
 
+from actionwire import config
+
 
 @dataclass
 class Color:
@@ -19,20 +21,30 @@ class Color:
     def __str__(self) -> str:
         return f"Color: {self.name}"
 
-    def set_color(self, color: "Color") -> "Color":
+    @override
+    def __repr__(self) -> str:
+        return f"Color: {self.name}"
+
+    def change_color(self, color: "Color") -> "Color":
         """Return a new color with the same brightness"""
         return color.set_brightness(self.brightness)
 
     def set_brightness(self, brightness: int) -> "Color":
+        new_brightness = min(
+            max(brightness, config.MIN_BRIGHTNESS), config.MAX_BRIGHTNESS
+        )
         return Color(
             name=self.name,
             color=[
                 self.hue,
                 self.saturation,
-                brightness,
+                new_brightness,
                 self.kelvin,
             ],
         )
+
+    def adjust_brightness(self, diff: int) -> "Color":
+        return self.set_brightness(self.brightness + diff)
 
     def code(self) -> list[int]:
         return [self.hue, self.saturation, self.brightness, self.kelvin]

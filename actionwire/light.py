@@ -15,26 +15,17 @@ class AbsLightController:
     def __str__(self) -> str:
         return self.name
 
-    def brightness(self) -> int:
-        return self.color.brightness
-
-    def hue(self) -> int:
-        return self.color.hue
-
-    def saturation(self) -> int:
-        return self.color.saturation
-
     def adjust_brightness(self, diff: int):
-        self.set_brightness(self.brightness() + diff)
+        self.color = self.color.adjust_brightness(diff)
 
     def set_brightness(self, brightness: int):
-        new_brightness = min(
-            max(brightness, config.MIN_BRIGHTNESS), config.MAX_BRIGHTNESS
-        )
         self.color = self.color.set_brightness(brightness)
 
+    def change_color(self, color: Color):
+        self.color = self.color.change_color(color)
+
     def set_color(self, color: Color):
-        self.color = self.color.set_color(color)
+        self.color = color
 
     def sync(self, duration: int = 200):
         pass
@@ -66,7 +57,6 @@ class GroupLightController(AbsLightController):
     def sync(self, duration: int = 0):
         for light in self.lights:
             light.set_color(self.color)
-            light.set_brightness(self.brightness())
             try:
                 light.sync(duration)
             except Exception as e:

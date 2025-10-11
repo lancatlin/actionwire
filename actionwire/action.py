@@ -33,7 +33,7 @@ class ResetAction(Action):
         return f"{type(self).__name__}: Reset {self.controller}"
 
     def do(self):
-        self.controller.set_color(config.INITIAL_COLOR)
+        self.controller.change_color(config.INITIAL_COLOR)
         self.controller.set_brightness(config.initial_brightness)
         self.controller.sync(200)
 
@@ -61,7 +61,7 @@ class FlashAction(Action):
         return f"{type(self).__name__}: Flash of {self.controller}"
 
     def do(self):
-        original = self.controller.brightness()
+        original = self.controller.color.brightness
         new_brightness = (
             config.MAX_BRIGHTNESS if original < 50000 else config.MIN_BRIGHTNESS
         )
@@ -83,7 +83,7 @@ class ColorAction(Action):
         return f"{type(self).__name__}: Change color of {self.controller} to {self.color}, {self.diff}"
 
     def do(self):
-        self.controller.set_color(self.color)
+        self.controller.change_color(self.color)
         self.controller.adjust_brightness(self.diff)
         self.controller.sync(500)
 
@@ -103,7 +103,7 @@ class SwapColorAction(Action):
         old_color = self.controller.color
         for color in self.colors:
             if color.name != old_color.name:
-                self.controller.set_color(color)
+                self.controller.change_color(color)
                 self.controller.sync(500)
                 break
 
