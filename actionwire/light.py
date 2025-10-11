@@ -1,3 +1,4 @@
+from typing import override
 from actionwire import config
 from actionwire.config import WHITE
 from lifxlan import Light  # type:ignore
@@ -8,6 +9,10 @@ class AbsLightController:
         self.name: str = name
         self.color: list[int] = color
         self.set_brightness(brightness)
+
+    @override
+    def __str__(self) -> str:
+        return self.name
 
     def brightness(self) -> int:
         return self.color[2]
@@ -20,7 +25,6 @@ class AbsLightController:
 
     def adjust_brightness(self, diff: int):
         self.set_brightness(self.brightness() + diff)
-        print(f"{self.name} brightness: change {diff}. Now {self.brightness()}")
 
     def set_brightness(self, brightness: int):
         new_brightness = min(
@@ -30,7 +34,6 @@ class AbsLightController:
 
     def set_color(self, color: list[int]):
         self.color = [color[0], color[1], self.brightness(), color[3]]
-        print(f"{self.name} color: Now {self.color}")
 
     def sync(self, duration: int = 200):
         pass

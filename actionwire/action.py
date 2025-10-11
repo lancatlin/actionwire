@@ -2,7 +2,7 @@ from time import sleep
 from actionwire import config
 from actionwire.light import AbsLightController
 from actionwire.synchan import SynchanController
-from actionwire.utils import tc
+from actionwire.utils import format_timecode, tc
 
 
 class Action:
@@ -17,13 +17,19 @@ class PrintAction(Action):
     def __init__(self, text: str):
         self.text = text
 
+    def __str__(self) -> str:
+        return f"{type(self).__name__}: {self.text}"
+
     def do(self):
-        print("Print action:", self.text)
+        pass
 
 
 class ResetAction(Action):
     def __init__(self, controller: AbsLightController):
         self.controller = controller
+
+    def __str__(self) -> str:
+        return f"{type(self).__name__}: Reset {self.controller}"
 
     def do(self):
         self.controller.set_color(config.YELLOW)
@@ -36,6 +42,9 @@ class BrightnessAction(Action):
         self.controller = controller
         self.diff = diff
 
+    def __str__(self) -> str:
+        return f"{type(self).__name__}: Change brightness of {self.controller}"
+
     def do(self):
         self.controller.adjust_brightness(self.diff)
         self.controller.sync(200)
@@ -46,6 +55,9 @@ class FlashAction(Action):
         super().__init__()
         self.controller: AbsLightController = controller
         self.length: float = length
+
+    def __str__(self) -> str:
+        return f"{type(self).__name__}: Flash of {self.controller}"
 
     def do(self):
         original = self.controller.brightness()
@@ -66,6 +78,9 @@ class ColorAction(Action):
         self.color: list[int] = color
         self.diff: int = diff
 
+    def __str__(self) -> str:
+        return f"{type(self).__name__}: Change color of {self.controller} to {self.color}, {self.diff}"
+
     def do(self):
         self.controller.set_color(self.color)
         self.controller.adjust_brightness(self.diff)
@@ -77,6 +92,11 @@ class SwapColorAction(Action):
         super().__init__()
         self.controller: AbsLightController = controller
         self.colors: list[list[int]] = colors
+
+    def __str__(self) -> str:
+        return (
+            f"{type(self).__name__}: Swap color of {self.controller} to {self.colors}"
+        )
 
     def do(self):
         hue = self.controller.hue()
@@ -96,6 +116,9 @@ class SeekAction(Action):
             self.target: int = tc(target)
         else:
             self.target = target
+
+    def __str__(self) -> str:
+        return f"{type(self).__name__}: Seek playhead to {format_timecode(self.target)}"
 
     def do(self):
         self.controller.seek(self.target)

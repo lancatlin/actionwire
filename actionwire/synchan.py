@@ -22,11 +22,9 @@ class SynchanController:
     headers: dict[str, str] = {"Content-Type": "application/json"}
 
     def seek(self, to: int):
-        print(f"Seeking to {to}")
         r = requests.post(
             f"{config.SYNCHAN_URL}/trpc/admin.seek", headers=self.headers, data=str(to)
         )
-        print(r.text)
 
     def play(self):
         requests.post(f"{config.SYNCHAN_URL}/trpc/admin.play", headers=self.headers)
