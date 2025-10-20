@@ -15,9 +15,9 @@ class Action:
         return f"{type(self).__name__}"
 
 
+@dataclass
 class PrintAction(Action):
-    def __init__(self, text: str):
-        self.text = text
+    text: str
 
     def __str__(self) -> str:
         return f"{type(self).__name__}: {self.text}"
@@ -26,9 +26,9 @@ class PrintAction(Action):
         pass
 
 
+@dataclass
 class ResetAction(Action):
-    def __init__(self, controller: AbsLightController):
-        self.controller: AbsLightController = controller
+    controller: AbsLightController
 
     def __str__(self) -> str:
         return f"{type(self).__name__}: Reset {self.controller}"
@@ -58,10 +58,10 @@ class TurnOnAction(Action):
         self.controller.sync(0)
 
 
+@dataclass
 class BrightnessAction(Action):
-    def __init__(self, controller: AbsLightController, diff: int):
-        self.controller = controller
-        self.diff = diff
+    controller: AbsLightController
+    diff: int
 
     def __str__(self) -> str:
         return f"{type(self).__name__}: Change brightness of {self.controller}"
@@ -71,11 +71,10 @@ class BrightnessAction(Action):
         self.controller.sync(200)
 
 
+@dataclass
 class FlashAction(Action):
-    def __init__(self, controller: AbsLightController, length: float = 0.5):
-        super().__init__()
-        self.controller: AbsLightController = controller
-        self.length: float = length
+    controller: AbsLightController
+    length: float = 0.5
 
     def __str__(self) -> str:
         return f"{type(self).__name__}: Flash of {self.controller}"
@@ -92,12 +91,11 @@ class FlashAction(Action):
         self.controller.sync(200)
 
 
+@dataclass
 class ColorAction(Action):
-    def __init__(self, controller: AbsLightController, color: Color, diff: int):
-        super().__init__()
-        self.controller: AbsLightController = controller
-        self.color: Color = color
-        self.diff: int = diff
+    controller: AbsLightController
+    color: Color
+    diff: int
 
     def __str__(self) -> str:
         return f"{type(self).__name__}: Change color of {self.controller} to {self.color}, {self.diff}"
@@ -108,11 +106,10 @@ class ColorAction(Action):
         self.controller.sync(500)
 
 
+@dataclass
 class SwapColorAction(Action):
-    def __init__(self, controller: AbsLightController, colors: list[Color]):
-        super().__init__()
-        self.controller: AbsLightController = controller
-        self.colors: list[Color] = colors
+    controller: AbsLightController
+    colors: list[Color]
 
     def __str__(self) -> str:
         return (
