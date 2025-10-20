@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import TypeVar
+from typing_extensions import Callable
 import reactivex as rx
 from reactivex.observable.observable import Observable
 import reactivex.operators as ops
@@ -33,6 +34,27 @@ def swap(pair: list[T], _) -> list[T]:
     return [pair[1], pair[0]]
 
 
+def on_off(on: Callable[[float], bool], off: Callable[[float], bool]):
+    def reducer(state: PlayState, t: float) -> PlayState:
+        if on(t) and not state.triggered:
+            return PlayState(True, True)
+
+        if off(t) and state.triggered:
+            return PlayState(False, True)
+
+        return PlayState(state.triggered, False)
+
+    return reducer
+
+
+def before(t_code: str) -> Callable[[float], bool]:
+    return lambda t: t < tc(t_code)
+
+
+def after(t_code: str) -> Callable[[float], bool]:
+    return lambda t: t > tc(t_code)
+
+
 def create_events(
     keywords: Observable[Match],
     timecodes: Observable[SynchanState],
@@ -47,17 +69,9 @@ def create_events(
         ops.share(),
     )
 
-    def replay_reducer(state: PlayState, t: float) -> PlayState:
-        if t < 5 and not state.triggered:
-            return PlayState(True, True)
-
-        if t > tc("21:00"):
-            return PlayState(False, False)
-
-        return PlayState(state.triggered, False)
-
+    # 關燈：在開始時關燈，以及 20:26 時關燈
     replay_stream = current_times.pipe(
-        ops.scan(replay_reducer, PlayState(False, False)),
+        ops.scan(on_off(before("00:05"), after("20:26")), PlayState(False, False)),
         ops.filter(lambda state: state.emit),
         ops.flat_map(
             lambda _: rx.of(
