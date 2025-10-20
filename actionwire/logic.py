@@ -14,6 +14,7 @@ from actionwire.action import (
     ResetAction,
     SeekAction,
     SwapColorAction,
+    TurnOnAction,
 )
 from actionwire.light import AbsLightController
 from actionwire.data_types import Match
@@ -77,6 +78,17 @@ def create_events(
             lambda _: rx.of(
                 ResetAction(p_light),
                 ResetAction(w_light),
+            )
+        ),
+    )
+
+    # 開燈：在 00:10 時開 P
+    replay_stream = current_times.pipe(
+        ops.scan(on_off(after("00:10"), before("00:10")), PlayState(False, False)),
+        ops.filter(lambda state: state.emit and state.triggered),
+        ops.flat_map(
+            lambda _: rx.of(
+                TurnOnAction(p_light),
             )
         ),
     )
