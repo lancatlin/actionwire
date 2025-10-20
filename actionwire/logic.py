@@ -1,6 +1,3 @@
-from dataclasses import dataclass
-from typing import TypeVar
-from typing_extensions import Callable
 import reactivex as rx
 from reactivex.observable.observable import Observable
 import reactivex.operators as ops
@@ -19,45 +16,16 @@ from actionwire.action import (
 from actionwire.light import AbsLightController
 from actionwire.data_types import Match
 from actionwire.synchan import SynchanController, SynchanState
-from actionwire.utils import format_timecode, tc
-
-
-T = TypeVar("T")
-
-
-@dataclass
-class PlayState:
-    triggered: bool
-    emit: bool
-
-
-def swap(pair: list[T], _) -> list[T]:
-    return [pair[1], pair[0]]
-
-
-def on_off(on: Callable[[float], bool], off: Callable[[float], bool]):
-    def reducer(state: PlayState, t: float) -> PlayState:
-        if not state.triggered and on(t):
-            return PlayState(True, True)
-
-        if state.triggered and off(t):
-            return PlayState(False, True)
-
-        return PlayState(state.triggered, False)
-
-    return reducer
-
-
-def before(t_code: str) -> Callable[[float], bool]:
-    return lambda t: t < tc(t_code)
-
-
-def after(t_code: str) -> Callable[[float], bool]:
-    return lambda t: t > tc(t_code)
-
-
-def between(start: str, end: str) -> Callable[[float], bool]:
-    return lambda t: t > tc(start) and t < tc(end)
+from actionwire.utils import (
+    format_timecode,
+    tc,
+    swap,
+    on_off,
+    before,
+    after,
+    between,
+    new_state,
+)
 
 
 def create_events(
@@ -76,7 +44,7 @@ def create_events(
 
     # 關燈：在開始時關燈，以及 20:26 時關燈
     replay_stream = current_times.pipe(
-        ops.scan(on_off(before("00:05"), after("20:26")), PlayState(False, False)),
+        ops.scan(on_off(before("00:05"), after("20:26")), new_state()),
         ops.filter(lambda state: state.emit),
         ops.flat_map(
             lambda _: rx.of(
@@ -88,14 +56,14 @@ def create_events(
 
     # P 開燈：在 00:10 時開 P
     p_on_stream = current_times.pipe(
-        ops.scan(on_off(after("00:10"), before("00:10")), PlayState(False, False)),
+        ops.scan(on_off(after("00:10"), before("00:10")), new_state()),
         ops.filter(lambda state: state.emit and state.triggered),
         ops.map(lambda _: TurnOnAction(p_light, config.YELLOW)),
     )
 
     # W 開燈：在 00:25 時開 W
     w_on_stream = current_times.pipe(
-        ops.scan(on_off(after("00:25"), before("00:25")), PlayState(False, False)),
+        ops.scan(on_off(after("00:25"), before("00:25")), new_state()),
         ops.filter(lambda state: state.emit and state.triggered),
         ops.map(lambda _: TurnOnAction(w_light, config.WHITE)),
     )
@@ -176,10 +144,8 @@ def create_events(
 
     # 喝這杯水
     drink_stream = current_times.pipe(
-        ops.scan(
-            on_off(between("12:49", "12:59"), after("20:00")), PlayState(False, False)
-        ),
-        ops.filter(lambda state: state.emit),
+        ops.scan(on_off(between("12:49", "12:59"), after("20:00")), new_state()),
+        ops.filter(lambda state: state.emit and state.triggered),
         ops.flat_map(
             lambda t: rx.merge(
                 rx.of(
