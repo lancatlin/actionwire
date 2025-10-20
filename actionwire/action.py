@@ -27,7 +27,7 @@ class PrintAction(Action):
 
 class ResetAction(Action):
     def __init__(self, controller: AbsLightController):
-        self.controller = controller
+        self.controller: AbsLightController = controller
 
     def __str__(self) -> str:
         return f"{type(self).__name__}: Reset {self.controller}"
@@ -35,7 +35,20 @@ class ResetAction(Action):
     def do(self):
         self.controller.change_color(config.INITIAL_COLOR)
         self.controller.set_brightness(config.initial_brightness)
-        self.controller.sync(200)
+        self.controller.set_power(False)
+        self.controller.sync(0)
+
+
+class TurnOnAction(Action):
+    def __init__(self, controller: AbsLightController):
+        self.controller: AbsLightController = controller
+
+    def __str__(self) -> str:
+        return f"{type(self).__name__}: Turn on {self.controller}"
+
+    def do(self):
+        self.controller.set_power(True)
+        self.controller.sync(0)
 
 
 class BrightnessAction(Action):

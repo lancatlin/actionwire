@@ -8,6 +8,7 @@ class AbsLightController:
     def __init__(self, name: str = "", color: Color = WHITE, brightness: int = 50):
         self.name: str = name
         self.color: Color = color
+        self.power: bool = False
         self.set_brightness(brightness)
 
     def __str__(self) -> str:
@@ -25,6 +26,9 @@ class AbsLightController:
     def set_color(self, color: Color):
         self.color = color
 
+    def set_power(self, power: bool):
+        self.power = power
+
     def sync(self, duration: int = 200):
         pass
 
@@ -36,6 +40,7 @@ class LifxLightController(AbsLightController):
         self.sync()
 
     def sync(self, duration: int = 0):
+        self.light.set_power(self.power, 0, False)
         self.light.set_color(self.color.code(), duration=duration)
 
 
@@ -55,6 +60,7 @@ class GroupLightController(AbsLightController):
     def sync(self, duration: int = 0):
         for light in self.lights:
             light.set_color(self.color)
+            light.set_power(self.power)
             try:
                 light.sync(duration)
             except Exception as e:
