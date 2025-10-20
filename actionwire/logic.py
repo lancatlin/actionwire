@@ -37,10 +37,10 @@ def swap(pair: list[T], _) -> list[T]:
 
 def on_off(on: Callable[[float], bool], off: Callable[[float], bool]):
     def reducer(state: PlayState, t: float) -> PlayState:
-        if on(t) and not state.triggered:
+        if not state.triggered and on(t):
             return PlayState(True, True)
 
-        if off(t) and state.triggered:
+        if state.triggered and off(t):
             return PlayState(False, True)
 
         return PlayState(state.triggered, False)
@@ -54,6 +54,10 @@ def before(t_code: str) -> Callable[[float], bool]:
 
 def after(t_code: str) -> Callable[[float], bool]:
     return lambda t: t > tc(t_code)
+
+
+def between(start: str, end: str) -> Callable[[float], bool]:
+    return lambda t: t > tc(start) and t < tc(end)
 
 
 def create_events(
@@ -83,7 +87,7 @@ def create_events(
     )
 
     # 開燈：在 00:10 時開 P
-    replay_stream = current_times.pipe(
+    p_on_stream = current_times.pipe(
         ops.scan(on_off(after("00:10"), before("00:10")), PlayState(False, False)),
         ops.filter(lambda state: state.emit and state.triggered),
         ops.flat_map(
@@ -167,18 +171,11 @@ def create_events(
         ),
     )
 
-    def drink_reducer(state: PlayState, t) -> PlayState:
-        if state.triggered and t > tc("20:00"):
-            return PlayState(False, False)
-
-        if not state.triggered and t > tc("12:49") and t < tc("12:59"):
-            return PlayState(True, True)
-
-        return PlayState(state.triggered, False)
-
     # 喝這杯水
     drink_stream = current_times.pipe(
-        ops.scan(drink_reducer, PlayState(False, False)),
+        ops.scan(
+            on_off(between("12:49", "12:59"), after("20:00")), PlayState(False, False)
+        ),
         ops.filter(lambda state: state.emit),
         ops.flat_map(
             lambda t: rx.merge(
@@ -188,7 +185,7 @@ def create_events(
                     BrightnessAction(w_light, config.brightness_step),
                 ),
                 current_times.pipe(
-                    ops.filter(lambda t: t > tc("01:22")),
+                    ops.filter(after("01:22")),
                     ops.take(1),
                     ops.flat_map(
                         lambda _: rx.of(
@@ -214,6 +211,7 @@ def create_events(
 
     return rx.merge(
         replay_stream,
+        p_on_stream,
         self_stream,
         change_stream,
         tea_stream,
@@ -221,4 +219,9 @@ def create_events(
         like_you_stream,
         drink_stream,
         timecode,
+    ).pipe(
+        ops.start_with(
+            ResetAction(p_light),
+            ResetAction(w_light),
+        )
     )
