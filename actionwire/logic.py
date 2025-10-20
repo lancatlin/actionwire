@@ -90,22 +90,14 @@ def create_events(
     p_on_stream = current_times.pipe(
         ops.scan(on_off(after("00:10"), before("00:10")), PlayState(False, False)),
         ops.filter(lambda state: state.emit and state.triggered),
-        ops.flat_map(
-            lambda _: rx.of(
-                TurnOnAction(p_light),
-            )
-        ),
+        ops.map(lambda _: TurnOnAction(p_light, config.YELLOW)),
     )
 
-    # P 開燈：在 00:10 時開 P
+    # W 開燈：在 00:25 時開 W
     w_on_stream = current_times.pipe(
         ops.scan(on_off(after("00:25"), before("00:25")), PlayState(False, False)),
         ops.filter(lambda state: state.emit and state.triggered),
-        ops.flat_map(
-            lambda _: rx.of(
-                TurnOnAction(w_light),
-            )
-        ),
+        ops.map(lambda _: TurnOnAction(w_light, config.WHITE)),
     )
 
     # 自己

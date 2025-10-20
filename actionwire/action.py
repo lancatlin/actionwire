@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from time import sleep
 from actionwire import config
 from actionwire.color import Color
@@ -39,15 +40,21 @@ class ResetAction(Action):
         self.controller.sync(0)
 
 
+@dataclass
 class TurnOnAction(Action):
-    def __init__(self, controller: AbsLightController):
-        self.controller: AbsLightController = controller
+    controller: AbsLightController
+    color: Color | None = None
+    brightness: int | None = None
 
     def __str__(self) -> str:
         return f"{type(self).__name__}: Turn on {self.controller}"
 
     def do(self):
         self.controller.set_power(True)
+        if self.color:
+            self.controller.change_color(self.color)
+        if self.brightness:
+            self.controller.set_brightness(self.brightness)
         self.controller.sync(0)
 
 

@@ -29,7 +29,7 @@ class AbsLightController:
     def set_power(self, power: bool):
         self.power = power
 
-    def sync(self, duration: int = 200):
+    def sync(self, duration: int = 0):
         pass
 
 
