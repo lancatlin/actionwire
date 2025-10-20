@@ -86,13 +86,24 @@ def create_events(
         ),
     )
 
-    # 開燈：在 00:10 時開 P
+    # P 開燈：在 00:10 時開 P
     p_on_stream = current_times.pipe(
         ops.scan(on_off(after("00:10"), before("00:10")), PlayState(False, False)),
         ops.filter(lambda state: state.emit and state.triggered),
         ops.flat_map(
             lambda _: rx.of(
                 TurnOnAction(p_light),
+            )
+        ),
+    )
+
+    # P 開燈：在 00:10 時開 P
+    w_on_stream = current_times.pipe(
+        ops.scan(on_off(after("00:25"), before("00:25")), PlayState(False, False)),
+        ops.filter(lambda state: state.emit and state.triggered),
+        ops.flat_map(
+            lambda _: rx.of(
+                TurnOnAction(w_light),
             )
         ),
     )
@@ -212,6 +223,7 @@ def create_events(
     return rx.merge(
         replay_stream,
         p_on_stream,
+        w_on_stream,
         self_stream,
         change_stream,
         tea_stream,
