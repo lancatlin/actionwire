@@ -63,7 +63,7 @@ def create_events(
 
     # W 開燈：在 00:25 時開 W
     w_on_stream = current_times.pipe(
-        ops.scan(on_off(after("00:24"), before("00:24")), new_state()),
+        ops.scan(on_off(after("00:31"), before("00:31")), new_state()),
         ops.filter(lambda state: state.emit and state.triggered),
         ops.map(lambda _: TurnOnAction(w_light, config.WHITE)),
     )
