@@ -1,6 +1,9 @@
+from dataclasses import dataclass
+import json
 import multiprocessing
 from reactivex.scheduler import ThreadPoolScheduler
-import sounddevice as sd  # type: ignore
+import sounddevice as sd
+from vosk import os  # type: ignore
 from actionwire.color import Color
 
 device_info = sd.query_devices(kind="input")
@@ -23,18 +26,6 @@ keywords = [
 """
 
 """
-
-p_lights = [
-    ("D0:73:D5:89:63:7B", "10.0.0.244"),  # Wancat
-    ("d0:73:d5:86:d6:01", "192.168.0.102"),
-]
-
-w_lights = [
-    ("D0:73:D5:89:C7:86", "10.0.0.228"),  # Wancat
-    ("d0:73:d5:86:dc:21", "192.168.0.103"),
-    ("d0:73:d5:86:b6:e6", "192.168.0.104"),
-    ("d0:73:d5:86:d5:18", "192.168.0.105"),
-]
 
 MAX_BRIGHTNESS = 65535
 MIN_BRIGHTNESS = 10000
@@ -60,4 +51,18 @@ INITIAL_COLOR = YELLOW
 
 # Synchan Settings
 
-SYNCHAN_URL = "http://localhost:3000"
+
+@dataclass
+class Config:
+    synchan_url: str
+    p_lights: list[tuple[str, str]]
+    w_lights: list[tuple[str, str]]
+
+
+def load_config(filename: str) -> Config:
+    with open(filename, "r") as f:
+        obj = json.load(f)
+        return Config(obj["synchan"], obj["p_lights"], obj["w_lights"])
+
+
+CONFIG_PATH = os.getenv("CONFIG_PATH") or "config.json"

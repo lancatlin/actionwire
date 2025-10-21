@@ -19,23 +19,24 @@ def subscribe(action: Action):
 
 
 def callback(keyword_stream: Observable[Match]):
+    c = config.load_config(config.CONFIG_PATH)
     p_light = GroupLightController(
-        config.p_lights,
+        c.p_lights,
         name="Philosopher",
         color=config.YELLOW,
         brightness=config.initial_brightness,
     )
     w_light = GroupLightController(
-        config.w_lights,
+        c.w_lights,
         name="Who is the speaker",
         color=config.YELLOW,
         brightness=config.initial_brightness,
     )
-    synchan = SynchanController()
+    synchan = SynchanController(c.synchan_url)
     keyword_stream.subscribe(print)
     print("Create events")
     create_events(
-        keyword_stream, create_synchan(), p_light, w_light, synchan
+        keyword_stream, create_synchan(c.synchan_url), p_light, w_light, synchan
     ).subscribe(on_next=subscribe, on_error=print)
 
 
