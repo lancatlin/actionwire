@@ -44,7 +44,7 @@ def create_events(
 
     # 關燈：在開始時關燈，以及 20:26 時關燈
     replay_stream = current_times.pipe(
-        ops.scan(on_off(before("00:05"), after("20:26")), new_state()),
+        ops.scan(on_off(before("00:05"), after("20:25")), new_state()),
         ops.filter(lambda state: state.emit),
         ops.flat_map(
             lambda _: rx.of(
@@ -56,14 +56,14 @@ def create_events(
 
     # P 開燈：在 00:10 時開 P
     p_on_stream = current_times.pipe(
-        ops.scan(on_off(after("00:10"), before("00:10")), new_state()),
+        ops.scan(on_off(after("00:09"), before("00:09")), new_state()),
         ops.filter(lambda state: state.emit and state.triggered),
         ops.map(lambda _: TurnOnAction(p_light, config.YELLOW)),
     )
 
     # W 開燈：在 00:25 時開 W
     w_on_stream = current_times.pipe(
-        ops.scan(on_off(after("00:25"), before("00:25")), new_state()),
+        ops.scan(on_off(after("00:24"), before("00:24")), new_state()),
         ops.filter(lambda state: state.emit and state.triggered),
         ops.map(lambda _: TurnOnAction(w_light, config.WHITE)),
     )
