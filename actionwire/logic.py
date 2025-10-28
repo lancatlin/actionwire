@@ -79,13 +79,15 @@ def create_events(
     )
 
     # 醒來
-    wake_stream = keywords.pipe(
-        ops.filter(lambda match: match.word == "醒来"),
+    wake_stream = rx.merge(
+        keywords.pipe(ops.filter(lambda match: match.word == "醒来")),
+        current_times.pipe(ops.filter(in_timecodes(config.timecodes["醒來"]))),
+    ).pipe(
         ops.scan(swap, [p_light, w_light]),
         ops.flat_map(
             lambda pair: [
-                ColorAction(pair[0], config.WHITE, config.brightness_step),
-                ColorAction(pair[1], config.YELLOW, -config.brightness_step),
+                ColorAction(pair[0], config.YELLOW, -config.brightness_step),
+                ColorAction(pair[1], config.WHITE, config.brightness_step),
             ]
         ),
     )
