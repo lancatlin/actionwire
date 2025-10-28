@@ -1,3 +1,4 @@
+from typing import Callable
 import reactivex as rx
 from reactivex.observable.observable import Observable
 import reactivex.operators as ops
@@ -43,6 +44,9 @@ def create_events(
         ops.share(),
     )
 
+    def from_timecodes(k: str) -> Observable[float]:
+        return current_times.pipe(ops.filter(in_timecodes(config.timecodes[k])))
+
     # 關燈：在開始時關燈，以及 20:26 時關燈
     replay_stream = current_times.pipe(
         ops.scan(on_off(before("00:05"), after("20:25")), new_state()),
@@ -72,7 +76,7 @@ def create_events(
     # 自己
     self_stream = rx.merge(
         keywords.pipe(ops.filter(lambda match: match.word == "自己")),
-        current_times.pipe(ops.filter(in_timecodes(config.timecodes["自己"]))),
+        from_timecodes("自己"),
     ).pipe(
         ops.throttle_first(3),
         ops.map(lambda match: FlashAction(p_light, 0.4)),
@@ -81,7 +85,7 @@ def create_events(
     # 醒來
     wake_stream = rx.merge(
         keywords.pipe(ops.filter(lambda match: match.word == "醒来")),
-        current_times.pipe(ops.filter(in_timecodes(config.timecodes["醒來"]))),
+        from_timecodes("醒來"),
     ).pipe(
         ops.scan(swap, [p_light, w_light]),
         ops.flat_map(
@@ -93,8 +97,10 @@ def create_events(
     )
 
     # 轉換
-    change_stream = keywords.pipe(
-        ops.filter(lambda match: match.word == "转换"),
+    change_stream = rx.merge(
+        keywords.pipe(ops.filter(lambda match: match.word == "转换")),
+        from_timecodes("轉換"),
+    ).pipe(
         ops.scan(swap, [p_light, w_light]),
         ops.flat_map(
             lambda pair: [
@@ -105,8 +111,10 @@ def create_events(
     )
 
     # 就像你
-    like_you_stream = keywords.pipe(
-        ops.filter(lambda match: match.word == "就像你"),
+    like_you_stream = rx.merge(
+        keywords.pipe(ops.filter(lambda match: match.word == "就像你")),
+        from_timecodes("就像你"),
+    ).pipe(
         ops.flat_map(
             lambda _: rx.of(
                 SwapColorAction(p_light, [config.WHITE, config.YELLOW]),
