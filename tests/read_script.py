@@ -1,4 +1,5 @@
 import csv
+import json
 from typing import Dict, List
 
 
@@ -20,4 +21,5 @@ def read_script(file: str) -> Dict[str, List[str]]:
 
 
 if __name__ == "__main__":
-    print(read_script("./data/script.csv"))
+    result = read_script("./data/script.csv")
+    print(json.dumps(result, ensure_ascii=False))

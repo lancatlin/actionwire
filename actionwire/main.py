@@ -36,7 +36,12 @@ def callback(keyword_stream: Observable[Match]):
     keyword_stream.subscribe(print)
     print("Create events")
     create_events(
-        keyword_stream, create_synchan(c.synchan_url), p_light, w_light, synchan
+        keyword_stream,
+        create_synchan(c.synchan_url),
+        p_light,
+        w_light,
+        synchan,
+        c.timecodes,
     ).subscribe(on_next=subscribe, on_error=print)
 
 

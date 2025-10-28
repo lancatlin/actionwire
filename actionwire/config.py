@@ -24,45 +24,6 @@ keywords = [
     "就像你",
 ]
 
-timecodes: Dict[str, List[str]] = {
-    "自己": [
-        "00:21",
-        "01:48",
-        "01:56",
-        "02:04",
-        "02:32",
-        "02:36",
-        "02:38",
-        "03:15",
-        "03:21",
-        "03:23",
-        "03:27",
-        "03:28",
-        "03:43",
-        "03:57",
-        "03:58",
-        "04:31",
-        "04:36",
-        "06:12",
-        "06:21",
-        "06:51",
-        "08:42",
-        "09:12",
-        "09:24",
-        "09:32",
-        "11:30",
-        "11:49",
-        "17:25",
-    ],
-    "醒來": ["02:55", "04:40", "08:54", "09:19"],
-    "就像你": ["04:05", "13:42", "16:46", "18:33", "19:31"],
-    "轉換": ["05:41", "06:00", "06:17", "06:22", "08:15", "08:17", "08:19"],
-}
-
-"""
-
-"""
-
 MAX_BRIGHTNESS = 65535
 MIN_BRIGHTNESS = 10000
 
@@ -93,12 +54,15 @@ class Config:
     synchan_url: str
     p_lights: list[tuple[str, str]]
     w_lights: list[tuple[str, str]]
+    timecodes: Dict[str, list[str]]
 
 
 def load_config(filename: str) -> Config:
     with open(filename, "r") as f:
         obj = json.load(f)
-        return Config(obj["synchan"], obj["p_lights"], obj["w_lights"])
+        return Config(
+            obj["synchan"], obj["p_lights"], obj["w_lights"], obj["timecodes"]
+        )
 
 
 CONFIG_PATH = os.getenv("CONFIG_PATH") or "config.json"

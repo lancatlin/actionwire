@@ -32,20 +32,21 @@ from actionwire.utils import (
 
 def create_events(
     keywords: Observable[Match],
-    timecodes: Observable[SynchanState],
+    synchan_stream: Observable[SynchanState],
     p_light: AbsLightController,
     w_light: AbsLightController,
     synchan: SynchanController,
+    timecodes: dict[str, list[str]],
 ) -> Observable[Action]:
     print("create logic")
 
-    current_times = timecodes.pipe(
+    current_times = synchan_stream.pipe(
         ops.map(lambda state: state.currentTime),
         ops.share(),
     )
 
     def from_timecodes(k: str) -> Observable[float]:
-        return current_times.pipe(ops.filter(in_timecodes(config.timecodes[k])))
+        return current_times.pipe(ops.filter(in_timecodes(timecodes[k])))
 
     # 關燈：在開始時關燈，以及 20:26 時關燈
     replay_stream = current_times.pipe(
