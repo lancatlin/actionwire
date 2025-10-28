@@ -18,6 +18,7 @@ from actionwire.data_types import Match
 from actionwire.synchan import SynchanController, SynchanState
 from actionwire.utils import (
     format_timecode,
+    in_timecodes,
     tc,
     swap,
     on_off,
@@ -69,8 +70,10 @@ def create_events(
     )
 
     # 自己
-    self_stream = keywords.pipe(
-        ops.filter(lambda match: match.word == "自己"),
+    self_stream = rx.merge(
+        keywords.pipe(ops.filter(lambda match: match.word == "自己")),
+        current_times.pipe(ops.filter(in_timecodes(config.timecodes["自己"]))),
+    ).pipe(
         ops.throttle_first(3),
         ops.map(lambda match: FlashAction(p_light, 0.4)),
     )

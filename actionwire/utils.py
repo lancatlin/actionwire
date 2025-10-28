@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Callable, TypeVar
+from typing import Callable, List, TypeVar
 
 
 def format_timecode(sec: float) -> str:
@@ -58,3 +58,15 @@ def after(t_code: str) -> Callable[[float], bool]:
 
 def between(start: str, end: str) -> Callable[[float], bool]:
     return lambda t: t > tc(start) and t < tc(end)
+
+
+def in_timecodes(timecodes: List[str]) -> Callable[[float], bool]:
+    def predicate(t: float) -> bool:
+        for timecode in timecodes:
+            s1 = tc(timecode)
+            s2 = s1 + 1
+            if s1 <= t and s2 >= t:
+                return True
+        return False
+
+    return predicate
