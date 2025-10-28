@@ -63,7 +63,7 @@ def between(start: str, end: str) -> Callable[[float], bool]:
 def in_timecodes(timecodes: List[str]) -> Callable[[float], bool]:
     def predicate(t: float) -> bool:
         for timecode in timecodes:
-            s1 = tc(timecode)
+            s1 = tc(timecode) + 1
             s2 = s1 + 1
             if s1 <= t and s2 >= t:
                 return True
