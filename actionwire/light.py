@@ -8,7 +8,7 @@ class AbsLightController:
     def __init__(self, name: str = "", color: Color = WHITE, brightness: int = 50):
         self.name: str = name
         self.color: Color = color
-        self.power: bool = False
+        self.power: bool = True
         self.set_brightness(brightness)
 
     def __str__(self) -> str:

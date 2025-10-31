@@ -41,7 +41,7 @@ def callback(keyword_stream: Observable[Match]):
         p_light,
         w_light,
         synchan,
-        c.timecodes,
+        c,
     ).subscribe(on_next=subscribe, on_error=print)
 
 

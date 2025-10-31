@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 import json
 import multiprocessing
-from typing import Dict, List
 from reactivex.scheduler import ThreadPoolScheduler
 import sounddevice as sd
 from vosk import os  # type: ignore
@@ -54,14 +53,22 @@ class Config:
     synchan_url: str
     p_lights: list[tuple[str, str]]
     w_lights: list[tuple[str, str]]
-    timecodes: Dict[str, list[str]]
+    timecodes: dict[str, list[str]]
+    enable_timecode: bool
+
+    def get_timecodes(self, key: str) -> list[str]:
+        return self.timecodes[key] or []
 
 
 def load_config(filename: str) -> Config:
     with open(filename, "r") as f:
         obj = json.load(f)
         return Config(
-            obj["synchan"], obj["p_lights"], obj["w_lights"], obj["timecodes"]
+            obj["synchan"],
+            obj["p_lights"],
+            obj["w_lights"],
+            obj["timecodes"],
+            obj["enable_timecode"],
         )
 
 

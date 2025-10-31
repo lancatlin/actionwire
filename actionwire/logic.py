@@ -36,7 +36,7 @@ def create_events(
     p_light: AbsLightController,
     w_light: AbsLightController,
     synchan: SynchanController,
-    timecodes: dict[str, list[str]],
+    conf: config.Config,
 ) -> Observable[Action]:
     print("create logic")
 
@@ -46,7 +46,11 @@ def create_events(
     )
 
     def from_timecodes(k: str) -> Observable[float]:
-        return current_times.pipe(ops.filter(in_timecodes(timecodes[k])))
+        return (
+            current_times.pipe(ops.filter(in_timecodes(conf.get_timecodes(k))))
+            if conf.enable_timecode
+            else rx.of()
+        )
 
     # 關燈：在開始時關燈，以及 20:26 時關燈
     replay_stream = current_times.pipe(
@@ -193,19 +197,14 @@ def create_events(
     )
 
     return rx.merge(
-        replay_stream,
-        p_on_stream,
-        w_on_stream,
+        replay_stream if conf.enable_timecode else rx.of(),
+        p_on_stream if conf.enable_timecode else rx.of(),
+        w_on_stream if conf.enable_timecode else rx.of(),
         self_stream,
         change_stream,
         tea_stream,
         wake_stream,
         like_you_stream,
-        drink_stream,
+        drink_stream if conf.enable_timecode else rx.of(),
         timecode,
-    ).pipe(
-        ops.start_with(
-            ResetAction(p_light),
-            ResetAction(w_light),
-        )
     )
